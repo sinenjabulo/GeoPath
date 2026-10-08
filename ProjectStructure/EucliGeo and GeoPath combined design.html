@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EucliGeo combined design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#F5F8FB; --grid:rgba(36,87,214,.07); --card:#FFFFFF; --ink:#13233F; --ink2:#4A5A74; --line:#D3DDE9;
+  --blue:#2457D6; --blue-soft:#E3EBFD; --good:#1E8E5A; --good-soft:#DDF3E8; --bad:#C2413B; --bad-soft:#FBE4E2; --mark:#F2B705; --mark-soft:#FFF3C7;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1626; --grid:rgba(125,162,255,.08); --card:#16213A; --ink:#E8EEF8; --ink2:#9AA9C2; --line:#2A3858;
+    --blue:#7DA2FF; --blue-soft:#1F2F57; --good:#47C98A; --good-soft:#173A2D; --bad:#FF8A80; --bad-soft:#40201F; --mark:#F5C84B; --mark-soft:#43391A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1626; --grid:rgba(125,162,255,.08); --card:#16213A; --ink:#E8EEF8; --ink2:#9AA9C2; --line:#2A3858;
+  --blue:#7DA2FF; --blue-soft:#1F2F57; --good:#47C98A; --good-soft:#173A2D; --bad:#FF8A80; --bad-soft:#40201F; --mark:#F5C84B; --mark-soft:#43391A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.15;margin:0}
+h1{font-size:clamp(2.2rem,5vw,3.6rem);letter-spacing:-.02em;max-width:17ch}
+h2{font-size:1.8rem;letter-spacing:-.01em;margin:64px 0 8px}
+h3{font-size:1.1rem;margin:0 0 6px}
+p{margin:0 0 12px;max-width:68ch}
+.lead{color:var(--ink2);font-size:1.1rem;max-width:62ch}
+header.top{padding:56px 0 8px}
+.sub{color:var(--ink2);margin-bottom:20px;max-width:66ch}
+.kicker{display:inline-block;background:var(--mark-soft);border-left:4px solid var(--mark);padding:6px 12px;margin-top:20px;font-size:.95rem;max-width:64ch}
+button{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;background:var(--blue-soft);padding:1px 5px;border-radius:4px}
+.scroll{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:12px}
+.tbl th,.tbl td{text-align:left;padding:9px 10px;border-bottom:1.5px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-size:.9rem}
+
+/* flow */
+.lane{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap;margin:14px 0 6px}
+.lane-label{flex:0 0 100%;font-family:var(--display);font-weight:700;color:var(--blue);margin-top:18px}
+.node{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;flex:1 1 140px;max-width:190px;font-size:.92rem}
+.node b{display:block;font-family:var(--display);font-size:.98rem}
+.node span{color:var(--ink2);font-size:.85rem;display:block;line-height:1.35}
+.node:not(:last-child)::after{content:"";position:absolute;right:-12px;top:50%;margin-top:-5px;border:5px solid transparent;border-left:7px solid var(--blue)}
+.node.key{border-color:var(--blue);background:var(--blue-soft)}
+.node.ct{border-color:var(--mark);background:var(--mark-soft)}
+.loop{font-size:.9rem;color:var(--ink2);margin:4px 0 0;max-width:80ch}
+
+/* app frame */
+.frame{background:var(--card);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1.5px solid var(--line);font-family:var(--display);font-weight:700;flex-wrap:wrap}
+.bar nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.bar nav button{background:none;border:0;border-bottom:3px solid transparent;font-family:var(--body);font-weight:400;font-size:.92rem;color:var(--ink2);padding:6px 10px;cursor:pointer}
+.bar nav button[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--mark)}
+.body{padding:20px}
+.view{display:none}.view.on{display:block}
+.note{background:var(--blue-soft);border-radius:10px;padding:12px 14px;font-size:.92rem;margin-top:14px}
+.note b{font-family:var(--display)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:820px){.two,.grid3,.grid2,.grid4{grid-template-columns:1fr!important}}
+.card{border:1.5px solid var(--line);border-radius:10px;padding:14px;background:var(--card)}
+.card.sel{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 1px var(--blue)}
+.pill{display:inline-block;border:1.5px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.8rem;color:var(--ink2);margin:0 4px 4px 0}
+.btn{display:inline-block;font-family:var(--display);font-weight:700;background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:.95rem;cursor:pointer}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;flex:1}
+.meter i{display:block;height:100%;background:var(--blue)}
+.muted{color:var(--ink2);font-size:.88rem}
+.row{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.fb{min-height:1.5em;font-size:.92rem;margin:8px 0 0}
+.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+
+/* diagrams */
+svg.dia{width:100%;height:auto;max-width:360px;display:block;margin:0 auto}
+.dia .c{fill:none;stroke:var(--ink);stroke-width:2}
+.dia .ln{stroke:var(--ink);stroke-width:2;fill:none}
+.dia .lbl{fill:var(--ink);font:700 15px var(--display)}
+.dia .ang{fill:var(--mark);fill-opacity:.45;stroke:var(--ink);stroke-width:1}
+.dia .hl{opacity:0;stroke:var(--mark);stroke-width:6;fill:none;stroke-linecap:round;transition:opacity .18s}
+.dia .hlf{opacity:0;fill:var(--mark);fill-opacity:.6;stroke:none;transition:opacity .18s}
+.dia.on-centre .k-centre,.dia.on-radii .k-radii,.dia.on-ca .k-ca,.dia.on-cb .k-cb,.dia.on-tri .k-tri,
+.dia.on-angC .k-angC,.dia.on-angO .k-angO,.dia.on-angA .k-angA,.dia.on-angB .k-angB{opacity:1}
+.mini{width:100%;height:auto;max-height:120px;display:block}
+.mini .c{fill:none;stroke:var(--ink);stroke-width:2}
+.mini .ln{stroke:var(--ink);stroke-width:2;fill:none}
+.mini .em{stroke:var(--blue);stroke-width:4;fill:none;stroke-linecap:round}
+.mini .emf{fill:var(--blue);fill-opacity:.3;stroke:var(--blue);stroke-width:3}
+
+/* CT stage bar */
+.stages{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.stg{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:999px;padding:5px 13px 5px 6px;font-family:var(--display);font-size:.9rem;background:var(--card)}
+.stg i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 .78rem var(--display);font-style:normal}
+.stg.cur{border-color:var(--mark);background:var(--mark-soft)}
+.stg.cur i{background:var(--mark);color:#1b1500}
+.stg.done i{background:var(--good);color:#fff}
+.task{font-family:var(--display);font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.why{font-size:.9rem;color:var(--ink2);margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:.9rem;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;text-align:left}
+.chip[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 1px var(--blue)}
+select{font:inherit;font-size:.9rem;max-width:100%;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:7px 8px;width:100%}
+.subs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.subs{grid-template-columns:1fr 1fr}}
+.subc{border:1.5px solid var(--line);border-radius:10px;padding:8px;background:var(--card);cursor:pointer;text-align:left}
+.subc[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 1px var(--blue)}
+.subc small{display:block;font-size:.8rem;line-height:1.25;margin-top:4px}
+.proof{border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-top:6px}
+.step{display:grid;grid-template-columns:30px 1fr 1fr;gap:8px;padding:9px 10px;border-bottom:1.5px solid var(--line);align-items:center;font-size:.9rem;background:var(--card)}
+.step:last-child{border-bottom:0}
+.step .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 .78rem var(--display);background:var(--line)}
+.step.ok{background:var(--good-soft)}.step.ok .n{background:var(--good);color:#fff}
+.step.active{box-shadow:inset 4px 0 0 var(--mark)}
+.step small{display:block;color:var(--ink2);font-size:.75rem}
+.picker{padding:10px 12px;background:var(--mark-soft);border-top:1.5px solid var(--line)}
+.picker h4{font:700 .85rem var(--display);margin:4px 0 2px}
+.result{background:var(--good-soft);border:1.5px solid var(--good);border-radius:10px;padding:12px 14px;margin-top:12px}
+
+/* theorems */
+.ctrl{display:grid;gap:10px;margin-top:12px}
+.ctrl label{display:flex;align-items:center;gap:10px;font-size:.92rem}
+.ctrl label span{min-width:130px}
+input[type=range]{flex:1;accent-color:var(--blue);min-width:0}
+.readout{font-family:var(--display);background:var(--mark-soft);border-left:4px solid var(--mark);padding:8px 12px;border-radius:0 8px 8px 0;margin-top:12px}
+.readout b{font-size:1.2rem}
+
+/* defs */
+.search{width:100%;max-width:340px;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink);margin-bottom:14px}
+
+/* approach */
+.alg{counter-reset:a;display:grid;gap:10px}
+.alg .card{position:relative;padding-left:56px}
+.alg .card::before{counter-increment:a;content:counter(a);position:absolute;left:14px;top:12px;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font:700 .95rem var(--display)}
+.alg .card.ctc{border-color:var(--mark);background:var(--mark-soft)}
+.alg .card.ctc::before{background:var(--mark);color:#1b1500}
+.alg .ask{font-style:italic;color:var(--ink2);font-size:.92rem}
+
+/* heat */
+.heat{display:grid;gap:3px;font-size:.8rem}
+.heat div{padding:8px 4px;text-align:center;border-radius:4px;color:#10192b;font-weight:700}
+.heat .h{background:none;color:var(--ink2);font-weight:400;font-size:.75rem}
+.heat .nm{background:none;color:var(--ink);text-align:left;font-weight:400}
+
+.tree{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;white-space:pre;line-height:1.5}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.sw{width:128px;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card);font-size:.8rem}
+.sw i{display:block;height:44px}
+.sw div{padding:6px 8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>EucliGeo and GeoPath, combined</h1>
+  <p class="lead">One product: EucliGeo's teaching approach (computational thinking, guided diagrams, theorems you can manipulate) running on GeoPath's practice engine (proof builder, mastery tracking, class analytics, performance targets).</p>
+  <div class="kicker">The big idea: every problem is solved in four named stages (abstraction, decomposition, pattern recognition, solve), and the app records which stage a learner struggles with, not just whether the answer was right.</div>
+</header>
+
+<h2>What comes from where</h2>
+<div class="scroll"><table class="tbl">
+<thead><tr><th>Feature</th><th>From</th><th>How it changes in the combined product</th></tr></thead>
+<tbody>
+<tr><td>Examples page</td><td>EucliGeo</td><td>Becomes the question bank. Every question is solved through the four thinking stages, with the proof builder as the last stage.</td></tr>
+<tr><td>Definitions page</td><td>EucliGeo</td><td>Stays, and each term is linkable. Inside a problem, a term opens as a small popover instead of leaving the page.</td></tr>
+<tr><td>Theorems page</td><td>EucliGeo</td><td>Keeps the sliders and angle toggles. Each theorem also links to the questions that practise it, and to the learner's mastery of it.</td></tr>
+<tr><td>Approach page</td><td>EucliGeo</td><td>Stays as the reference. The same steps appear as the stage bar in every example, so the strategy is practised, not just read.</td></tr>
+<tr><td>GeoGebra decomposition</td><td>EucliGeo</td><td>Decomposition becomes an in-app step where the learner picks which sub-diagrams help. GeoGebra is loaded on demand for free exploration.</td></tr>
+<tr><td>Guidance on which sides and angles to use</td><td>EucliGeo</td><td>A "Guide me" button on every stage highlights the right parts of the diagram. Using it is recorded, like a hint.</td></tr>
+<tr><td>Proof builder (statement plus reason)</td><td>GeoPath</td><td>Becomes the "Solve" stage.</td></tr>
+<tr><td>Accounts, classes, mastery, next best question</td><td>GeoPath</td><td>Added around the four pages. Mastery is tracked per theorem and per thinking stage.</td></tr>
+<tr><td>Teacher analytics</td><td>GeoPath</td><td>The heatmap gains a thinking-stage view.</td></tr>
+<tr><td>Performance targets and load testing</td><td>GeoPath</td><td>Kept, with new targets for the interactive diagrams and the GeoGebra embed.</td></tr>
+</tbody></table></div>
+
+<h2>User flows</h2>
+<p class="sub">Yellow nodes are the four thinking stages. They are the same stages in the Examples page, the Approach page and the analytics.</p>
+
+<div class="lane">
+  <div class="lane-label">Learner: solving a problem</div>
+  <div class="node"><b>Sign in</b><span>Or try as guest</span></div>
+  <div class="node"><b>Home</b><span>Next best example, mastery</span></div>
+  <div class="node"><b>Examples</b><span>Filter by topic, difficulty</span></div>
+  <div class="node ct"><b>Abstraction</b><span>Pick the givens and the target</span></div>
+  <div class="node ct"><b>Decomposition</b><span>Split into sub-diagrams</span></div>
+  <div class="node ct"><b>Patterns</b><span>Match each part to a theorem</span></div>
+  <div class="node ct"><b>Solve</b><span>Statements and reasons</span></div>
+  <div class="node key"><b>Result</b><span>Score per stage, next example</span></div>
+</div>
+<p class="loop">At any stage the learner can open a theorem or a definition in a side panel and come back to exactly where they were. "Guide me" and hints are available at every stage and are recorded.</p>
+
+<div class="lane">
+  <div class="lane-label">Learner: studying</div>
+  <div class="node"><b>Definitions</b><span>Search a term</span></div>
+  <div class="node key"><b>Theorems</b><span>Sliders and angle toggles</span></div>
+  <div class="node"><b>Practise this theorem</b><span>Jumps to matching examples</span></div>
+  <div class="node"><b>Approach</b><span>The strategy as a checklist</span></div>
+  <div class="node"><b>Progress</b><span>Mastery by theorem and stage</span></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Teacher</div>
+  <div class="node"><b>Create class</b><span>Join code</span></div>
+  <div class="node"><b>Assign examples</b><span>By topic or theorem</span></div>
+  <div class="node key"><b>Heatmap</b><span>Learners by theorem or by stage</span></div>
+  <div class="node"><b>Hardest examples</b><span>Which stage fails most</span></div>
+  <div class="node"><b>Live quiz</b><span>Later phase</span></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Author</div>
+  <div class="node"><b>Theorem editor</b><span>Interactive config</span></div>
+  <div class="node"><b>Example editor</b><span>Diagram JSON, live preview</span></div>
+  <div class="node"><b>Define stages</b><span>Givens, sub-diagrams, patterns, steps</span></div>
+  <div class="node"><b>Publish</b><span>Appears in Examples</span></div>
+</div>
+
+<h2>Interactive prototype</h2>
+<p class="sub">Use the navigation inside the frame. In <b>Examples</b>, open the first example and work through the four stages (try a wrong answer, and try "Guide me"). In <b>Theorems</b>, drag the sliders. <b>Class view</b> shows the teacher's thinking-stage heatmap.</p>
+
+<div class="frame">
+  <div class="bar"><span>&#9651; EucliGeo</span>
+    <nav id="nav" aria-label="Prototype navigation">
+      <button data-v="examples" aria-current="page">Examples</button>
+      <button data-v="defs">Definitions</button>
+      <button data-v="theorems">Theorems</button>
+      <button data-v="approach">Approach</button>
+      <button data-v="progress">My progress</button>
+      <button data-v="class">Class view</button>
+    </nav>
+  </div>
+  <div class="body">
+
+  <!-- EXAMPLES -->
+  <section class="view on" id="v-examples">
+    <div id="exList">
+      <h3 style="font-size:1.3rem">Examples</h3>
+      <p class="muted">Pick one. You will solve it in four stages.</p>
+      <div class="grid3">
+        <div class="card" style="border-color:var(--blue)"><svg class="mini" viewBox="0 0 320 270" aria-hidden="true"><circle class="c" cx="160" cy="140" r="100"/><path class="ln" d="M160 40 L102.6 221.9 L217.4 221.9 Z M160 140 L102.6 221.9 M160 140 L217.4 221.9"/></svg>
+          <h3 style="margin-top:8px">Find ∠OAB</h3><span class="pill">Circle geometry</span><span class="pill">Medium</span>
+          <div class="actions"><button class="btn" id="openEx">Start example</button></div></div>
+        <div class="card"><svg class="mini" viewBox="0 0 120 80" aria-hidden="true"><circle class="c" cx="60" cy="40" r="30"/><path class="ln" d="M90 8 V72 M60 40 L90 40"/></svg>
+          <h3 style="margin-top:8px">Tangent and radius</h3><span class="pill">Circle geometry</span><span class="pill">Easy</span><p class="muted" style="margin-top:8px">Not wired up in this prototype.</p></div>
+        <div class="card"><svg class="mini" viewBox="0 0 120 80" aria-hidden="true"><circle class="c" cx="60" cy="40" r="30"/><path class="ln" d="M54.8 10.5 L31.8 50.3 L75 66 L88.2 29.7 Z"/></svg>
+          <h3 style="margin-top:8px">Cyclic quadrilateral</h3><span class="pill">Circle geometry</span><span class="pill">Hard</span><p class="muted" style="margin-top:8px">Not wired up in this prototype.</p></div>
+      </div>
+    </div>
+
+    <div id="solver" style="display:none">
+      <div class="actions" style="margin:0 0 10px"><button class="btn ghost" id="backEx">Back to examples</button><span class="muted">O is the centre of the circle. ∠ACB = 35°. Prove that ∠OAB = 55°.</span></div>
+      <div class="stages" id="stages"></div>
+      <div class="two">
+        <div id="leftPane"></div>
+        <div>
+          <div class="task" id="task"></div>
+          <div class="why" id="why"></div>
+          <div id="work"></div>
+          <p class="fb" id="fb" aria-live="polite"></p>
+          <div class="actions"><button class="btn" id="check">Check</button><button class="btn ghost" id="guide">Guide me</button><button class="btn ghost" id="hintBtn">Hint</button><button class="btn" id="next" disabled>Next stage</button></div>
+          <p class="muted" id="used" style="margin-top:6px">Guides and hints used: 0</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEFINITIONS -->
+  <section class="view" id="v-defs">
+    <h3 style="font-size:1.3rem">Definitions</h3>
+    <input class="search" id="dq" type="search" placeholder="Search a term, for example chord" aria-label="Search definitions">
+    <div class="grid4" id="dgrid"></div>
+  </section>
+
+  <!-- THEOREMS -->
+  <section class="view" id="v-theorems">
+    <h3 style="font-size:1.3rem">Theorem: angle at the centre</h3>
+    <p class="muted">The angle at the centre is twice the angle at the circumference, when both stand on the same arc.</p>
+    <div class="two">
+      <svg class="dia" id="tsvg" viewBox="0 0 320 270" role="img" aria-label="Circle with chord AB, centre O and a movable point C. Angles at O and C are shown."></svg>
+      <div>
+        <div class="ctrl">
+          <label><input type="checkbox" id="tAng" checked> <span>Show angles</span></label>
+          <label><input type="checkbox" id="tRad" checked> <span>Show radii OA and OB</span></label>
+          <label><span>Radius</span><input type="range" id="tR" min="60" max="105" value="100" aria-label="Radius"></label>
+          <label><span>Size of ∠AOB</span><input type="range" id="tT" min="40" max="140" value="70" aria-label="Size of angle AOB"></label>
+          <label><span>Move point C</span><input type="range" id="tC" min="-100" max="100" value="0" aria-label="Position of point C"></label>
+        </div>
+        <div class="readout" id="tread"></div>
+        <div class="actions"><button class="btn">Practise this theorem</button><button class="btn ghost" id="gg">Open in GeoGebra</button></div>
+        <p class="muted" id="ggmsg"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPROACH -->
+  <section class="view" id="v-approach">
+    <h3 style="font-size:1.3rem">Approach: how to solve a geometry problem</h3>
+    <p class="muted">Yellow steps are the four thinking stages used in every example.</p>
+    <div class="alg">
+      <div class="card ctc"><h3>Abstraction: keep what matters</h3><p class="ask">What am I given? What must I find? Which parts of the diagram do I ignore?</p></div>
+      <div class="card ctc"><h3>Decomposition: split the diagram</h3><p class="ask">Which smaller diagrams (a triangle, a pair of angles on a chord) can I solve one at a time?</p></div>
+      <div class="card ctc"><h3>Pattern recognition: match to a theorem</h3><p class="ask">Have I seen this shape before? Which theorem or property fits each part?</p></div>
+      <div class="card ctc"><h3>Solve: write statements and reasons</h3><p class="ask">What follows from each fact I have? What is the reason for each statement?</p></div>
+      <div class="card"><h3>Reflect and check</h3><p class="ask">Did I use every given? Does the answer make sense on the diagram? If not, go back to step 1.</p></div>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section class="view" id="v-progress">
+    <h3 style="font-size:1.3rem">My progress</h3>
+    <div class="grid2" style="margin-top:12px">
+      <div class="card"><h3>Mastery by thinking stage</h3>
+        <div class="row"><span style="min-width:130px">Abstraction</span><div class="meter"><i style="width:82%"></i></div><b>82%</b></div>
+        <div class="row"><span style="min-width:130px">Decomposition</span><div class="meter"><i style="width:64%"></i></div><b>64%</b></div>
+        <div class="row"><span style="min-width:130px">Pattern recognition</span><div class="meter"><i style="width:48%"></i></div><b>48%</b></div>
+        <div class="row"><span style="min-width:130px">Solving</span><div class="meter"><i style="width:55%"></i></div><b>55%</b></div>
+        <p class="muted" style="margin-top:8px">Pattern recognition is your weakest stage. Your next examples focus on matching diagrams to theorems.</p>
+      </div>
+      <div class="card" style="border-color:var(--blue);background:var(--blue-soft)"><h3>Next up for you</h3>
+        <p><b>Cyclic quadrilateral.</b> "Angles in the same segment" is due for review.</p><span class="btn">Start example</span></div>
+    </div>
+    <h3 style="margin-top:16px">Mastery by theorem</h3>
+    <div class="grid3" id="tiles"></div>
+  </section>
+
+  <!-- CLASS -->
+  <section class="view" id="v-class">
+    <h3 style="font-size:1.3rem">Class 11B: where learners lose marks</h3>
+    <div class="two" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
+      <div><div class="heat" id="heat" role="table" aria-label="Class heatmap by thinking stage"></div></div>
+      <div class="card"><h3>What the class needs</h3>
+        <p>Pattern recognition is the weakest stage for 6 of 8 learners, mostly on cyclic quadrilaterals.</p>
+        <p class="muted">Suggested: assign "Cyclic quadrilateral" and review the Theorems page together.</p>
+        <span class="btn ghost">Assign example</span></div>
+    </div>
+  </section>
+
+  </div>
+</div>
+<div class="note"><b>What is new compared with both originals.</b> The stage bar, "Guide me", and the per-stage results exist in neither project alone. They turn the computational-thinking idea from content a learner reads into behaviour the app can measure and the teacher can act on.</div>
+
+<h2>Angular structure</h2>
+<div class="scroll"><table class="tbl">
+<thead><tr><th>Route</th><th>Feature area</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>/</code></td><td>home</td><td>Next best example and mastery. Falls back to a simple landing for guests.</td></tr>
+<tr><td><code>/examples</code></td><td>examples</td><td>List with filters in the query string, virtual scroll when the bank grows.</td></tr>
+<tr><td><code>/examples/:id</code></td><td>solver</td><td>The four-stage flow. Stage is part of the URL (<code>?stage=pattern</code>) so refresh and back work.</td></tr>
+<tr><td><code>/definitions</code></td><td>definitions</td><td>Mostly static content. Good candidate for server-side rendering.</td></tr>
+<tr><td><code>/theorems/:id</code></td><td>theorems</td><td>Interactive diagram driven by a config from the API. GeoGebra loaded only on request.</td></tr>
+<tr><td><code>/approach</code></td><td>approach</td><td>Static. Pre-rendered.</td></tr>
+<tr><td><code>/progress</code></td><td>progress</td><td>Mastery by theorem and by stage.</td></tr>
+<tr><td><code>/classes/:id</code></td><td>teacher</td><td>Heatmap with a theorem view and a stage view.</td></tr>
+<tr><td><code>/author</code></td><td>authoring</td><td>Editors for theorems and examples.</td></tr>
+</tbody></table></div>
+
+<h3 style="margin-top:28px">Folder layout</h3>
+<div class="tree">src/app/
+  core/            auth, api client, interceptors, error handling
+  shared/
+    ui/            button, chip, meter, skeleton, popover
+    diagram/       geo-diagram (renders diagram JSON, accepts highlight keys)
+    term-link/     inline definition popover used across features
+  features/
+    examples/      example-list, example-card
+    solver/        solver.page, stage-bar, abstraction-stage, decomposition-stage,
+                   pattern-stage, solve-stage, guide.service, solver.store
+    definitions/   definitions.page, term-card
+    theorems/      theorem.page, theorem-controls, geogebra-loader.service
+    approach/      approach.page
+    progress/      progress.page, stage-meters, theorem-tile
+    teacher/       heatmap (theorem view, stage view), hardest-examples
+    authoring/     example-editor, theorem-editor</div>
+
+<h3 style="margin-top:28px">Design decisions</h3>
+<p><b>Two diagram engines, on purpose.</b> The solver and theorem sliders use the app's own SVG <code>geo-diagram</code> component: small, fast and easy to highlight. GeoGebra is kept for free-form exploration and is loaded through a loader service only when the learner presses "Open in GeoGebra". You can measure the bundle and load-time difference, which is a real performance lesson.</p>
+<p><b>One diagram format.</b> Every example and theorem is a JSON description (points, lines, circles, angles, named highlight keys). The same JSON drives the thumbnail, the solver, the sub-diagrams in decomposition, and the theorem page.</p>
+<p><b>The solver store.</b> <code>solver.store</code> holds the current stage, the learner's choices per stage, the hints and guides used, and per-stage correctness, all as signals. Each stage result is sent to the server as it completes.</p>
+
+<h2>Data model changes</h2>
+<div class="scroll"><table class="tbl">
+<thead><tr><th>Table</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td><code>definitions</code></td><td>New. term, text, diagram_json, topic_id.</td></tr>
+<tr><td><code>theorems</code></td><td>Add interactive_config JSONB (sliders, toggles, default values).</td></tr>
+<tr><td><code>questions</code></td><td>Rename conceptually to examples. Add <code>stage_config</code> JSONB: the relevant givens and distractors, valid sub-diagrams, and the pattern for each sub-diagram.</td></tr>
+<tr><td><code>attempt_stages</code></td><td>New. attempt_id, stage (abstraction, decomposition, pattern, solve), is_correct, tries, guides_used, hints_used, duration_ms.</td></tr>
+<tr><td><code>attempt_steps</code></td><td>Unchanged. Still the high-volume proof-step table.</td></tr>
+<tr><td><code>mastery</code></td><td>Add a second kind of row: mastery per thinking stage, not only per theorem.</td></tr>
+</tbody></table></div>
+
+<h2>Performance goals added by the merge</h2>
+<div class="scroll"><table class="tbl">
+<thead><tr><th>Area</th><th>Target or lesson</th></tr></thead>
+<tbody>
+<tr><td>Theorem sliders</td><td>Dragging stays at 60 fps. Update only the SVG nodes that change, and batch updates with <code>requestAnimationFrame</code>.</td></tr>
+<tr><td>GeoGebra</td><td>Zero GeoGebra bytes on first load. Measure the cost when it is loaded, and show a skeleton while it loads.</td></tr>
+<tr><td>Solver</td><td>Stage transitions under 100 ms. Prefetch the next stage's component while the learner is working.</td></tr>
+<tr><td>Stage results</td><td>Write <code>attempt_stages</code> asynchronously so the learner never waits for the database.</td></tr>
+<tr><td>Static pages</td><td>Definitions and Approach pre-rendered. Lighthouse performance above 95.</td></tr>
+<tr><td>Teacher stage heatmap</td><td>Class view under 500 ms with 1M attempt_steps, using pre-aggregated per-stage data.</td></tr>
+<tr><td>Kept from GeoPath</td><td>Question list p95 under 150 ms, step validation p95 under 80 ms, 200 concurrent learners, bundle under 250 KB gzipped.</td></tr>
+</tbody></table></div>
+
+<h2>Design tokens</h2>
+<p class="sub">Same exercise-book look as before. The highlighter yellow now has a second job: it marks the four thinking stages everywhere they appear.</p>
+<div class="swatches">
+  <div class="sw"><i style="background:var(--paper);border-bottom:1.5px solid var(--line)"></i><div><b>Paper</b><br>Background</div></div>
+  <div class="sw"><i style="background:var(--ink)"></i><div><b>Ink</b><br>Text, diagram lines</div></div>
+  <div class="sw"><i style="background:var(--blue)"></i><div><b>Construction blue</b><br>Actions, selections</div></div>
+  <div class="sw"><i style="background:var(--mark)"></i><div><b>Highlighter</b><br>Thinking stages, diagram focus</div></div>
+  <div class="sw"><i style="background:var(--good)"></i><div><b>Correct</b><br>Verified</div></div>
+  <div class="sw"><i style="background:var(--bad)"></i><div><b>Check again</b><br>Wrong</div></div>
+</div>
+<p class="muted">Accessibility: visible focus, feedback never relies on colour alone, text descriptions on diagrams, sliders have labels, reduced-motion respected.</p>
+
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+// nav
+$$('#nav button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#nav button').forEach(x=>x.removeAttribute('aria-current'));b.setAttribute('aria-current','page');
+  $$('.view').forEach(v=>v.classList.remove('on'));$('#v-'+b.dataset.v).classList.add('on');
+}));
+
+/* ---------- main diagram markup ---------- */
+function mainSvg(){return `<svg class="dia" id="msvg" viewBox="0 0 320 270" role="img" aria-label="Circle with centre O. Points A and B on the circle and C at the top. Lines OA, OB, CA, CB and AB are drawn.">
+<circle class="c" cx="160" cy="140" r="100"/>
+<path class="hlf k-tri" d="M160 140 L102.6 221.9 L217.4 221.9 Z"/>
+<path class="hlf k-angC" d="M160 40 L147.96 78.16 A40 40 0 0 0 172.04 78.16 Z"/>
+<path class="hlf k-angO" d="M160 140 L139.3 169.5 A36 36 0 0 0 180.7 169.5 Z"/>
+<path class="hlf k-angA" d="M102.6 221.9 L122.1 194.1 A34 34 0 0 1 136.6 221.9 Z"/>
+<path class="hlf k-angB" d="M217.4 221.9 L197.9 194.1 A34 34 0 0 0 183.4 221.9 Z"/>
+<line class="hl k-radii" x1="160" y1="140" x2="102.6" y2="221.9"/><line class="hl k-radii" x1="160" y1="140" x2="217.4" y2="221.9"/>
+<line class="hl k-ca" x1="160" y1="40" x2="102.6" y2="221.9"/><line class="hl k-cb" x1="160" y1="40" x2="217.4" y2="221.9"/>
+<circle class="hl k-centre" cx="160" cy="140" r="12"/>
+<path class="ln" d="M160 40 L102.6 221.9 M160 40 L217.4 221.9 M160 140 L102.6 221.9 M160 140 L217.4 221.9 M102.6 221.9 L217.4 221.9"/>
+<circle cx="160" cy="140" r="3.5" fill="var(--ink)"/>
+<text class="lbl" x="166" y="134">O</text><text class="lbl" x="154" y="30">C</text><text class="lbl" x="80" y="238">A</text><text class="lbl" x="224" y="238">B</text>
+<text class="lbl" x="171" y="96" style="font-size:12px">35°</text>
+<text x="8" y="262" fill="var(--ink2)" style="font:12px var(--body)">Not drawn to scale</text></svg>`}
+function subSvg(kind){
+  const base='<circle class="c" cx="160" cy="140" r="100"/>';
+  let p='';
+  if(kind==='a') p='<path class="ln" d="M160 40 L102.6 221.9 M160 40 L217.4 221.9 M160 140 L102.6 221.9 M160 140 L217.4 221.9"/>';
+  if(kind==='b') p='<path class="ln" d="M160 140 L102.6 221.9 L217.4 221.9 Z"/>';
+  if(kind==='c') p='<path class="ln" d="M160 40 L102.6 221.9 L217.4 221.9 Z"/>';
+  const ct=kind==='b'?'':'';
+  return `<svg class="mini" viewBox="0 0 320 270" aria-hidden="true">${kind==='b'?'':base}${p}</svg>`;
+}
+const setHl=keys=>{const s=$('#msvg'); if(s) s.setAttribute('class','dia '+keys.map(k=>'on-'+k).join(' '))};
+
+/* ---------- solver ---------- */
+const STAGES=['Abstraction','Decomposition','Pattern recognition','Solve'];
+const TASKS=[
+ ['Pick what you need','Tap only the facts you need. Ignore the rest. This keeps you from being distracted by parts of the diagram that do not help.'],
+ ['Split the diagram','Choose the smaller diagrams that help you reach the answer. Each one should be easier to solve on its own.'],
+ ['Match each part to a theorem','Look at the shape of each part. Which rule does it follow?'],
+ ['Write the proof','For each step, choose the statement and the reason. The first two steps come from the patterns you found.']
+];
+const S={stage:0,done:[false,false,false,false],used:0,sel:{},hints:0,solveStep:2};
+const ABS=[{k:'centre',t:'O is the centre',need:1},{k:'angC',t:'∠ACB = 35°',need:1},{k:'angA',t:'Find ∠OAB',need:1},{k:'ca',t:'Length of CA',need:0},{k:'cb',t:'Length of CB',need:0}];
+const SUBS=[{id:'a',t:'Angles at O and C on chord AB',need:1,hl:['angC','angO']},{id:'b',t:'Triangle OAB',need:1,hl:['tri']},{id:'c',t:'Triangle ABC',need:0,hl:['ca','cb']}];
+const PATS=['Choose a theorem…','Angle at the centre = 2 × angle at the circumference','Radii are equal, so the triangle is isosceles','Angles in the same segment are equal'];
+const PROOF=[
+ {s:'∠AOB = 70°',r:'∠ at centre = 2 × ∠ at circumference',hl:['angO','angC'],pre:1},
+ {s:'OA = OB',r:'Radii of the same circle',hl:['radii'],pre:1},
+ {S:['∠OAB = ∠OBA','∠OAB = ∠ACB','∠OAB = 90°'],R:['Angles opposite equal sides','Angles in the same segment','Tangent is perpendicular to radius'],hl:['angA','angB'],hint:'Look at triangle OAB. Which two sides did you prove equal in step 2?'},
+ {S:['∠OAB = 55°','∠OAB = 110°','∠OAB = 35°'],R:['Sum of angles in a triangle = 180°','Exterior angle of a triangle','Co-interior angles'],hl:['angA','angB','angO'],hint:'The three angles of triangle OAB add to 180°. You know ∠AOB, and the other two are equal.'}
+];
+function stageBar(){
+  $('#stages').innerHTML=STAGES.map((n,i)=>`<div class="stg ${S.done[i]?'done':''} ${i===S.stage?'cur':''}"><i>${S.done[i]?'&#10003;':i+1}</i>${n}</div>`).join('');
+}
+function fb(msg,ok){const f=$('#fb');f.textContent=msg;f.className='fb '+(ok===true?'good':ok===false?'bad':'')}
+function updUsed(){$('#used').textContent='Guides and hints used: '+S.used}
+function render(){
+  stageBar();fb('');$('#next').disabled=!S.done[S.stage];
+  $('#task').textContent=TASKS[S.stage][0];$('#why').textContent=TASKS[S.stage][1];
+  const w=$('#work'),L=$('#leftPane');
+  $('#next').textContent=S.stage===3?'Finish':'Next stage';
+  if(S.stage===0){
+    L.innerHTML=mainSvg();
+    w.innerHTML='<div class="chips" id="absChips">'+ABS.map((a,i)=>`<button class="chip" aria-pressed="false" data-i="${i}">${a.t}</button>`).join('')+'</div>';
+    $$('#absChips .chip').forEach(c=>c.addEventListener('click',()=>{c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')!=='true');
+      setHl($$('#absChips .chip[aria-pressed=true]').map(x=>ABS[x.dataset.i].k));}));
+    setHl([]);
+  }
+  if(S.stage===1){
+    L.innerHTML=mainSvg();
+    w.innerHTML='<div class="subs" id="subs">'+SUBS.map((s,i)=>`<button class="subc" aria-pressed="false" data-i="${i}">${subSvg(s.id)}<small>${s.t}</small></button>`).join('')+'</div>';
+    $$('#subs .subc').forEach(c=>c.addEventListener('click',()=>{c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')!=='true');
+      const ks=[];$$('#subs .subc[aria-pressed=true]').forEach(x=>ks.push(...SUBS[x.dataset.i].hl));setHl(ks);}));
+    setHl([]);
+  }
+  if(S.stage===2){
+    L.innerHTML=mainSvg();
+    const opts=PATS.map((p,i)=>`<option value="${i}">${p}</option>`).join('');
+    w.innerHTML=`<div class="card" style="margin-bottom:8px"><div class="subs" style="grid-template-columns:90px 1fr;align-items:center"><div>${subSvg('a')}</div><div><b>Angles at O and C on chord AB</b><select id="pa" aria-label="Theorem for angles at O and C">${opts}</select></div></div></div>
+    <div class="card"><div class="subs" style="grid-template-columns:90px 1fr;align-items:center"><div>${subSvg('b')}</div><div><b>Triangle OAB</b><select id="pb" aria-label="Theorem for triangle OAB">${opts}</select></div></div></div>`;
+    $('#pa').addEventListener('change',()=>setHl(['angC','angO']));$('#pb').addEventListener('change',()=>setHl(['tri','radii']));
+    setHl([]);
+  }
+  if(S.stage===3) renderSolve();
+  updUsed();
+}
+function renderSolve(){
+  $('#leftPane').innerHTML=mainSvg();
+  const i=S.solveStep;
+  let h='<div class="proof">';
+  PROOF.forEach((p,j)=>{
+    if(j<i) h+=`<div class="step ok"><span class="n">&#10003;</span><span>${p.s||S.sel['s'+j]}</span><span><small>Reason</small>${p.r||S.sel['r'+j]}</span></div>`;
+    else if(j===i) h+=`<div class="step active"><span class="n">${j+1}</span><span><small>Statement</small>Choose below</span><span><small>Reason</small>Choose below</span></div>`;
+    else h+=`<div class="step"><span class="n">${j+1}</span><span>&nbsp;</span><span>&nbsp;</span></div>`;
+  });
+  h+='</div>';
+  if(i<PROOF.length){const p=PROOF[i];
+    h+=`<div class="picker"><h4>Statement for step ${i+1}</h4><div class="chips" id="cS">${p.S.map((t,k)=>`<button class="chip" aria-pressed="false" data-k="${k}">${t}</button>`).join('')}</div>
+    <h4>Reason</h4><div class="chips" id="cR">${p.R.map((t,k)=>`<button class="chip" aria-pressed="false" data-k="${k}">${t}</button>`).join('')}</div></div>`;
+    $('#work').innerHTML=h;
+    ['#cS','#cR'].forEach(id=>{const box=$(id);box.dataset.v='';[...box.children].forEach(c=>c.addEventListener('click',()=>{[...box.children].forEach(x=>x.setAttribute('aria-pressed','false'));c.setAttribute('aria-pressed','true');box.dataset.v=c.dataset.k;}));});
+    setHl(PROOF[Math.max(0,i)].hl);
+  } else {
+    h+=`<div class="result"><b style="font-family:var(--display)">Proof complete.</b><p style="margin:6px 0 0">Stage results: abstraction, decomposition and patterns correct. Guides and hints used: ${S.used}. Your mastery of "Angle at the centre" and "Isosceles triangle" goes up.</p></div>`;
+    $('#work').innerHTML=h;setHl(['angA']);
+    S.done[3]=true;stageBar();
+  }
+}
+function openSolver(){$('#exList').style.display='none';$('#solver').style.display='block';Object.assign(S,{stage:0,done:[false,false,false,false],used:0,sel:{},solveStep:2});render();}
+$('#openEx').addEventListener('click',openSolver);
+$('#backEx').addEventListener('click',()=>{$('#solver').style.display='none';$('#exList').style.display='block'});
+
+$('#check').addEventListener('click',()=>{
+  if(S.stage===0){
+    const on=$$('#absChips .chip[aria-pressed=true]').map(x=>+x.dataset.i);
+    const missing=ABS.some((a,i)=>a.need&&!on.includes(i)), extra=ABS.some((a,i)=>!a.need&&on.includes(i));
+    if(!on.length) return fb('Tap the facts you need first.',false);
+    if(extra) return fb('Some of these do not help. You do not need side lengths here, only angles and the centre.',false);
+    if(missing) return fb('Not everything yet. You need two givens and the angle you must find.',false);
+    S.done[0]=true;fb('Correct. Two givens and one target: that is all this problem needs.',true);
+  }
+  if(S.stage===1){
+    const on=$$('#subs .subc[aria-pressed=true]').map(x=>+x.dataset.i);
+    if(!on.length) return fb('Select the sub-diagrams that help.',false);
+    if(on.includes(2)) return fb('Triangle ABC does not use the centre, so it cannot help you reach ∠OAB. Remove it.',false);
+    if(on.length<2) return fb('You need two parts: one with the angle at the circle, and the triangle that holds the angle you must find.',false);
+    S.done[1]=true;fb('Correct. Two smaller diagrams, each easier than the whole.',true);
+  }
+  if(S.stage===2){
+    const a=+$('#pa').value,b=+$('#pb').value;
+    if(!a||!b) return fb('Choose a theorem for both parts.',false);
+    if(a!==1) return fb('Look at the angles at O and C. Both stand on chord AB. Which theorem links them?',false);
+    if(b!==2) return fb('Look at OA and OB in triangle OAB. What do you know about radii?',false);
+    S.done[2]=true;fb('Correct. Both patterns recognised.',true);
+  }
+  if(S.stage===3){
+    const i=S.solveStep,cS=$('#cS'),cR=$('#cR');
+    if(!cS||cS.dataset.v===''||cR.dataset.v==='') return fb('Choose a statement and a reason, then check.',false);
+    if(cS.dataset.v!=='0') return fb('Check the statement again. Look at triangle OAB.',false);
+    if(cR.dataset.v!=='0') return fb('The statement is right, but another reason fits it.',false);
+    S.sel['s'+i]=PROOF[i].S[0];S.sel['r'+i]=PROOF[i].R[0];S.solveStep++;renderSolve();
+    fb(S.solveStep>=PROOF.length?'All steps correct.':'Correct. On to the next step.',true);
+  }
+  stageBar();$('#next').disabled=!S.done[S.stage];
+});
+$('#next').addEventListener('click',()=>{ if(S.stage<3){S.stage++;render();} else {$('#backEx').click();} });
+$('#guide').addEventListener('click',()=>{
+  S.used++;updUsed();
+  if(S.stage===0){setHl(['centre','angC','angA']);fb('Look at the centre O, the 35° angle at C, and the angle at A that you must find.');}
+  if(S.stage===1){setHl(['angC','angO','tri']);fb('One part holds the angles at O and C. The other is the triangle with corners O, A and B.');}
+  if(S.stage===2){setHl(['angC','angO']);fb('Compare the angle at O with the angle at C. Then look at the sides of triangle OAB.');}
+  if(S.stage===3){const i=Math.min(S.solveStep,PROOF.length-1);setHl(PROOF[i].hl);fb('Focus on the highlighted angles for this step.');}
+});
+$('#hintBtn').addEventListener('click',()=>{
+  S.used++;updUsed();
+  const t=['Ask: what does the question give me, and what do I need to find?','Ask: which parts of the diagram share the same angle or the same sides?','Think about which theorem uses the centre, and which uses equal radii.'];
+  fb(S.stage<3?t[S.stage]:(PROOF[Math.min(S.solveStep,PROOF.length-1)].hint||'Use your patterns.'));
+});
+
+/* ---------- definitions ---------- */
+const C='<circle class="c" cx="60" cy="40" r="30"/>';
+const DEFS=[
+ ['Radius','A line from the centre to any point on the circle.',C+'<path class="em" d="M60 40 L90 40"/>'],
+ ['Diameter','A chord that passes through the centre. It is twice the radius.',C+'<path class="em" d="M30 40 L90 40"/>'],
+ ['Chord','A straight line joining two points on the circle.',C+'<path class="em" d="M31.8 50.3 L83 20.7"/>'],
+ ['Tangent','A line that touches the circle at exactly one point.',C+'<path class="em" d="M90 8 V72"/>'],
+ ['Arc','A part of the circumference between two points.',C+'<path class="em" d="M88.2 29.7 A30 30 0 0 0 54.8 10.5"/>'],
+ ['Segment','The region between a chord and the arc it cuts off.',C+'<path class="emf" d="M31.8 29.7 A30 30 0 0 1 88.2 29.7 Z"/>'],
+ ['Cyclic quadrilateral','A four-sided shape with all four corners on a circle.',C+'<path class="em" d="M54.8 10.5 L31.8 50.3 L75 66 L88.2 29.7 Z"/>'],
+ ['Subtend','A chord subtends an angle at a point when lines from the point to the chord ends form that angle.',C+'<path class="ln" d="M60 10 L31.8 50.3 M60 10 L88.2 50.3"/><path class="em" d="M31.8 50.3 L88.2 50.3"/>']
+];
+function drawDefs(q){
+  $('#dgrid').innerHTML=DEFS.filter(d=>d[0].toLowerCase().includes(q.toLowerCase())).map(d=>`<div class="card"><svg class="mini" viewBox="0 0 120 80" aria-hidden="true">${d[2]}</svg><h3 style="margin-top:8px">${d[0]}</h3><p class="muted" style="margin:0">${d[1]}</p></div>`).join('')||'<p class="muted">No term matches. Try "chord" or "tangent".</p>';
+}
+drawDefs('');$('#dq').addEventListener('input',e=>drawDefs(e.target.value));
+
+/* ---------- theorem interactive ---------- */
+const pt=(phi,r)=>[160+r*Math.cos(phi*Math.PI/180),140-r*Math.sin(phi*Math.PI/180)];
+function wedge(P,Q1,Q2,rad){
+  const n=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);return [dx/l,dy/l]};
+  const u1=n(P,Q1),u2=n(P,Q2),p1=[P[0]+rad*u1[0],P[1]+rad*u1[1]],p2=[P[0]+rad*u2[0],P[1]+rad*u2[1]];
+  const sw=(u1[0]*u2[1]-u1[1]*u2[0])>0?1:0;
+  const m=[u1[0]+u2[0],u1[1]+u2[1]],ml=Math.hypot(m[0],m[1])||1;
+  const lab=[P[0]+(rad+16)*m[0]/ml,P[1]+(rad+16)*m[1]/ml];
+  const ang=Math.acos(u1[0]*u2[0]+u1[1]*u2[1])*180/Math.PI;
+  return {d:`M${P[0]} ${P[1]} L${p1[0]} ${p1[1]} A${rad} ${rad} 0 0 ${sw} ${p2[0]} ${p2[1]} Z`,lab,ang};
+}
+let raf=0;
+function drawT(){
+  const r=+$('#tR').value,th=+$('#tT').value,cv=+$('#tC').value,showA=$('#tAng').checked,showR=$('#tRad').checked;
+  const O=[160,140],A=pt(270-th/2,r),B=pt(270+th/2,r),half=180-th/2-14,C=pt(90+(cv/100)*half,r);
+  const wO=wedge(O,A,B,28),wC=wedge(C,A,B,24);
+  const f=n=>n.toFixed(1);
+  let s=`<circle class="c" cx="160" cy="140" r="${r}"/>`;
+  if(showA) s+=`<path class="ang" d="${wO.d}"/><path class="ang" d="${wC.d}"/><text class="lbl" style="font-size:12px" x="${wO.lab[0]-12}" y="${wO.lab[1]+4}">${Math.round(wO.ang)}°</text><text class="lbl" style="font-size:12px" x="${wC.lab[0]-12}" y="${wC.lab[1]+4}">${Math.round(wC.ang)}°</text>`;
+  s+=`<path class="ln" d="M${A[0]} ${A[1]} L${B[0]} ${B[1]} M${C[0]} ${C[1]} L${A[0]} ${A[1]} M${C[0]} ${C[1]} L${B[0]} ${B[1]}${showR?` M160 140 L${A[0]} ${A[1]} M160 140 L${B[0]} ${B[1]}`:''}"/>`;
+  s+=`<circle cx="160" cy="140" r="3.5" fill="var(--ink)"/><text class="lbl" x="${showR?168:166}" y="${showR?132:134}">O</text>`;
+  const lab=(P,t,dx,dy)=>`<circle cx="${P[0]}" cy="${P[1]}" r="3.5" fill="var(--ink)"/><text class="lbl" x="${P[0]+dx}" y="${P[1]+dy}">${t}</text>`;
+  s+=lab(A,'A',-20,16)+lab(B,'B',8,16)+lab(C,'C',-4,-10);
+  $('#tsvg').innerHTML=s;
+  $('#tread').innerHTML=`∠AOB = <b>${Math.round(wO.ang)}°</b> &nbsp; ∠ACB = <b>${f(wC.ang)}°</b><br>∠AOB ÷ ∠ACB = <b>${(wO.ang/wC.ang).toFixed(2)}</b>`;
+}
+['tR','tT','tC','tAng','tRad'].forEach(id=>$('#'+id).addEventListener('input',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(drawT)}));
+drawT();
+$('#gg').addEventListener('click',()=>{$('#ggmsg').textContent='In the real app, the GeoGebra script is loaded only now, with a loading skeleton, so it adds nothing to the first page load.'});
+
+/* ---------- progress tiles ---------- */
+const th=[['Angle at centre',88,0],['Same segment',62,1],['Cyclic quadrilateral',45,1],['Tangent ⟂ radius',74,0],['Isosceles triangle',81,0],['Alternate segment',18,0]];
+$('#tiles').innerHTML=th.map(t=>`<div class="card" style="background:color-mix(in srgb,var(--blue) ${Math.round(t[1]*.35)}%,var(--card));${t[2]?'border:2.5px dashed var(--mark)':''}"><b style="font-family:var(--display)">${t[0]}</b><div style="font-size:1.4rem;font-family:var(--display);font-weight:700">${t[1]}%</div><span class="muted">${t[2]?'Review due':'On track'}</span></div>`).join('');
+
+/* ---------- class heatmap ---------- */
+const names=['Aisha','Ben','Carlos','Dineo','Elan','Fatima','Grace','Hamza'];
+const cols=['Abstraction','Decomposition','Patterns','Solve'];
+let seed=11;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+const h=$('#heat');h.style.gridTemplateColumns='80px repeat(4,minmax(60px,1fr))';
+let html='<div class="h"></div>'+cols.map(c=>`<div class="h">${c}</div>`).join('');
+names.forEach((n,r)=>{html+=`<div class="nm">${n}</div>`;
+  cols.forEach((c,k)=>{let v=Math.round(55+rnd()*40);if(k===2)v=Math.max(15,v-38);if(k===3)v=Math.max(15,v-22);if(r===4)v=Math.max(10,v-30);
+    html+=`<div style="background:hsl(${Math.round(v*1.2)} 62% 66%)">${v}</div>`;});});
+h.innerHTML=html;
+})();
+</script>
+</body>
+</html>

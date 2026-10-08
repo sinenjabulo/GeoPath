@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EucliGeo wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#F5F8FB; --grid:rgba(36,87,214,.07); --card:#FFFFFF; --ink:#13233F; --ink2:#5B6A83; --line:#D3DDE9;
+  --blue:#2457D6; --blue-soft:#E3EBFD; --mark:#F2B705; --mark-soft:#FFF3C7;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--paper:#0E1626;--grid:rgba(125,162,255,.08);--card:#16213A;--ink:#E8EEF8;--ink2:#9AA9C2;--line:#2A3858;--blue:#7DA2FF;--blue-soft:#1F2F57;--mark:#F5C84B;--mark-soft:#43391A}
+}
+:root[data-theme="dark"]{--paper:#0E1626;--grid:rgba(125,162,255,.08);--card:#16213A;--ink:#E8EEF8;--ink2:#9AA9C2;--line:#2A3858;--blue:#7DA2FF;--blue-soft:#1F2F57;--mark:#F5C84B;--mark-soft:#43391A}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;scroll-behavior:smooth}
+body{margin:0;min-height:100%;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0}
+h1{font-size:clamp(2.1rem,5vw,3.4rem);letter-spacing:-.02em;max-width:18ch}
+h2{font-size:1.6rem;margin:40px 0 8px}
+h3{font-size:1.1rem}
+p{margin:0 0 12px;max-width:68ch}
+.lead{color:var(--ink2);font-size:1.08rem;max-width:64ch}
+header.top{padding:52px 0 8px}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82em;background:var(--blue-soft);padding:1px 6px;border-radius:4px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 16px;margin-top:20px;font-size:.92rem}
+.scroll{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:10px}
+.tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-size:.9rem}
+
+.roles{display:flex;gap:6px;flex-wrap:wrap;margin:28px 0 8px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);padding:8px 0;z-index:5}
+.roles button{font-family:var(--display);font-weight:500;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer}
+.roles button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.panel{display:none}.panel.on{display:block}
+.index{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 24px}
+.index a{font-size:.85rem;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:2px 11px;color:var(--ink);text-decoration:none}
+.index a:hover{border-color:var(--blue)}
+.group{font-family:var(--display);font-weight:700;color:var(--blue);margin:34px 0 10px;font-size:1.15rem}
+
+.wcard{margin:0 0 34px;scroll-margin-top:70px}
+.whead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-size:.78rem;border:1.5px solid var(--mark);background:var(--mark-soft);border-radius:999px;padding:0 9px}
+.wcols{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.wcols{grid-template-columns:1fr}}
+.notes{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-size:.9rem;counter-reset:n}
+.notes li{display:flex;gap:9px;align-items:flex-start;counter-increment:n}
+.notes li::before{content:counter(n);flex:none;width:19px;height:19px;border-radius:50%;background:var(--mark);color:#1b1500;font:700 .72rem var(--display);display:grid;place-items:center;margin-top:2px}
+
+/* wireframe kit */
+.wf{border:2px solid var(--ink);border-radius:8px;background:var(--card);overflow:hidden;font-size:12px;line-height:1.35;color:var(--ink)}
+.wf.phone{max-width:300px;border-radius:22px}
+.wnav{display:flex;gap:12px;align-items:center;padding:8px 12px;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.wnav span{color:var(--ink2)}
+.wnav .on{color:var(--ink);font-weight:700;border-bottom:3px solid var(--mark)}
+.wnav .rt{margin-left:auto;border:1.5px solid var(--ink2);border-radius:99px;padding:1px 9px}
+.wbody{padding:12px;display:grid;gap:10px}
+.blk{border:1.5px solid var(--ink2);border-radius:5px;padding:8px;display:grid;gap:6px;align-content:start;min-width:0}
+.blk.hi{border-color:var(--ink);border-width:2px}
+.ln{height:7px;border-radius:4px;background:var(--line)}
+.ln.hd{height:12px;background:var(--ink2);opacity:.8}
+.ph{position:relative;border:1.5px dashed var(--ink2);border-radius:5px;display:grid;place-items:center;
+  background:linear-gradient(to top right,transparent calc(50% - 1px),var(--line) 50%,transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),var(--line) 50%,transparent calc(50% + 1px))}
+.ph span{background:var(--card);padding:1px 6px;font-size:11px;color:var(--ink2);text-align:center;max-width:90%}
+.wb{display:inline-block;border:1.5px solid var(--ink);border-radius:4px;padding:3px 11px;white-space:nowrap}
+.wb.p{background:var(--ink);color:var(--card)}
+.wb.off{opacity:.4}
+.wc{display:inline-block;border:1.5px solid var(--ink2);border-radius:99px;padding:1px 9px;color:var(--ink2);white-space:nowrap}
+.wc.on{border-color:var(--ink);color:var(--ink);background:var(--line);font-weight:700}
+.wi{display:block;border:1.5px solid var(--ink2);border-radius:4px;padding:4px 8px;color:var(--ink2)}
+.wrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.wgrid{display:grid;gap:10px}
+.ann{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--mark);color:#1b1500;font:700 11px var(--display);flex:none}
+.wtabs{display:flex;gap:2px;border-bottom:1.5px solid var(--ink2);flex-wrap:wrap}
+.wtabs span{padding:4px 10px;border:1.5px solid transparent;color:var(--ink2)}
+.wtabs .on{border:1.5px solid var(--ink2);border-bottom-color:var(--card);margin-bottom:-1.5px;font-weight:700;color:var(--ink);border-radius:5px 5px 0 0}
+.mt{height:7px;border:1.5px solid var(--ink2);border-radius:99px;overflow:hidden;flex:1;min-width:30px}
+.mt i{display:block;height:100%;background:var(--ink2)}
+.cb{display:inline-block;width:12px;height:12px;border:1.5px solid var(--ink);border-radius:2px;flex:none}
+.cb.x{background:var(--ink)}
+.sl{display:inline-block;height:3px;background:var(--ink2);flex:1;min-width:40px;position:relative;border-radius:2px}
+.sl::after{content:"";position:absolute;left:var(--p,50%);top:-5px;width:12px;height:12px;border-radius:50%;background:var(--ink);transform:translateX(-50%)}
+.wt{display:grid;gap:0;border:1.5px solid var(--ink2);border-radius:5px;overflow:hidden}
+.wt>div{padding:5px 8px;border-bottom:1px solid var(--line);min-width:0}
+.wt .th{font-weight:700;background:var(--line)}
+.dim{opacity:.35}
+.drawer{border-left:2px solid var(--ink);background:var(--card);padding:10px;display:grid;gap:8px;align-content:start}
+.cell{height:22px;border-radius:3px}
+.sub{font-size:11px;color:var(--ink2)}
+.sep{border-top:1.5px dashed var(--ink2);margin:2px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>EucliGeo wireframes</h1>
+  <p class="lead">Every page and tab, for every kind of user. Grey boxes mean "content goes here". Numbered yellow markers match the notes next to each wireframe.</p>
+  <div class="legend">
+    <span><b>How to read</b></span>
+    <span><span class="wb p">Filled</span> main action</span>
+    <span><span class="wb">Outlined</span> secondary action</span>
+    <span><span class="wc on">Chip</span> selected</span>
+    <span style="display:inline-flex;gap:6px;align-items:center"><span style="display:inline-block;width:46px;height:26px;border:1.5px dashed var(--ink2)"></span> diagram or image</span>
+    <span><span class="ann">1</span> note marker</span>
+  </div>
+</header>
+
+<h2>Who sees what</h2>
+<div class="scroll"><table class="tbl">
+<thead><tr><th>User</th><th>Main navigation</th><th>Can access</th></tr></thead>
+<tbody>
+<tr><td><b>Visitor</b> (not signed in)</td><td>Examples, Definitions, Theorems, Approach, Sign in</td><td>All content pages and one trial example. Progress is not saved until they sign in.</td></tr>
+<tr><td><b>Learner</b></td><td>Home, Examples, Definitions, Theorems, Approach, Progress</td><td>Everything a visitor sees, plus saved progress, assigned work and settings.</td></tr>
+<tr><td><b>Teacher</b></td><td>Classes, Library, Reports</td><td>Class management and analytics. "Library" opens the learner content pages so they can preview what learners see.</td></tr>
+<tr><td><b>Author</b></td><td>Examples, Theorems, Definitions</td><td>Create, edit and publish content. Also has the Library view.</td></tr>
+</tbody></table></div>
+
+<div class="roles" role="tablist" aria-label="User type">
+  <button role="tab" aria-selected="true" data-r="all">Everyone</button>
+  <button role="tab" aria-selected="false" data-r="learner">Learner</button>
+  <button role="tab" aria-selected="false" data-r="teacher">Teacher</button>
+  <button role="tab" aria-selected="false" data-r="author">Author</button>
+</div>
+<div id="panels"></div>
+</div>
+
+<script>
+(function(){
+/* ---------- kit ---------- */
+const e=(c,i='',s='')=>`<div class="${c}" style="${s}">${i}</div>`;
+const P=(...a)=>a.join('');
+const ln=(w=100)=>e('ln','',`width:${w}%`);
+const hd=(w=50)=>e('ln hd','',`width:${w}%`);
+const lines=(n=3)=>P(...Array.from({length:n},(_,i)=>ln(i===n-1?60:96-i*6)));
+const btn=(t,p,off)=>`<span class="wb ${p?'p':''} ${off?'off':''}">${t}</span>`;
+const chip=(t,on)=>`<span class="wc ${on?'on':''}">${t}</span>`;
+const ph=(h,l,s='')=>e('ph',`<span>${l}</span>`,`height:${h}px;${s}`);
+const row=(a,s='')=>e('wrow',P(...a),s);
+const cols=(spec,a,s='')=>e('wgrid',P(...a),`grid-template-columns:${spec};${s}`);
+const blk=(i,hi)=>e('blk'+(hi?' hi':''),i);
+const A=n=>`<b class="ann">${n}</b>`;
+const inp=t=>`<span class="wi">${t}</span>`;
+const body=(...a)=>e('wbody',P(...a));
+const tabs=(a,act)=>e('wtabs',a.map((t,i)=>`<span class="${i===act?'on':''}">${t}</span>`).join(''));
+const nav=(items,act,right='Account')=>e('wnav',`<b>&#9651; EucliGeo</b>`+items.map((t,i)=>`<span class="${i===act?'on':''}">${t}</span>`).join('')+`<span class="rt">${right}</span>`);
+const mt=w=>`<span class="mt"><i style="width:${w}%"></i></span>`;
+const cb=(x)=>`<span class="cb ${x?'x':''}"></span>`;
+const sl=p=>`<span class="sl" style="--p:${p}%"></span>`;
+const tbl=(spec,head,rows)=>e('wt',head.map(h=>`<div class="th">${h}</div>`).join('')+rows.map(r=>r.map(c=>`<div>${c}</div>`).join('')).join(''),`grid-template-columns:${spec}`);
+const heat=(r,c)=>P(...Array.from({length:r*c},(_,i)=>{const s=((Math.floor(i/c)*7+(i%c)*13+3)%5)*17+12;return e('cell','',`background:color-mix(in srgb,var(--ink2) ${s}%,transparent)`)}));
+const LN=['Home','Examples','Definitions','Theorems','Approach','Progress'];
+const GN=['Examples','Definitions','Theorems','Approach'];
+const TN=['Classes','Library','Reports'];
+const AN=['Examples','Theorems','Definitions'];
+const STG=['Abstraction','Decomposition','Patterns','Solve'];
+
+const W=[];
+const add=(role,group,id,title,route,html,notes,tag='')=>W.push({role,group,id,title,route,html,notes,tag});
+
+/* ---------- shared solver builders ---------- */
+const solverBar=e('wnav',`<b>&#9651; EucliGeo</b><span>Example: Find ∠OAB</span><span class="rt">Exit</span>`);
+const stageBar=a=>row(STG.map((t,i)=>chip((i+1)+' '+t,i===a)));
+const solverActions=(nextOff=true)=>P(row([btn('Check',1),btn('Guide me'),btn('Hint'),btn('Next stage',0,nextOff)]),`<div class="sub">Guides and hints used: 0 &nbsp; Terms: <u>chord</u>, <u>radius</u></div>`);
+const solver=(a,left,right)=>solverBar+body(row([btn('Back'),ln(0)+'<div class="ln" style="width:200px"></div>']),stageBar(a),cols('1fr 1fr',[left,right]));
+
+/* =============== EVERYONE =============== */
+add('all','Before signing in','landing','Landing page','/',
+ nav(GN,-1,'Sign in '+A(4))+body(
+  cols('1.2fr 1fr',[e('','<div style="display:grid;gap:8px">'+row([hd(70),A(1)])+hd(45)+lines(2)+row([btn('Try an example',1),A(2),btn('Join with class code')])+'</div>'),ph(130,'Looping demo of a diagram being split')]),
+  row([A(3)],'margin-bottom:-4px'),
+  cols('repeat(4,1fr)',STG.map((t,i)=>blk(`<b>${i+1}. ${t}</b>`+ln(90)+ln(60)))),
+  cols('repeat(3,1fr)',['Interactive theorems','Step-by-step guidance','Track your progress'].map(t=>blk(`<b>${t}</b>`+lines(2))))
+ ),
+ ['Headline says what the site does in one line, for South African high school learners.','The main action lets anyone try an example without an account.','The four thinking stages are shown up front, because they are what makes the product different.','Sign in is always top right. Teachers and learners both use it.']);
+
+add('all','Before signing in','login','Sign in','/login',
+ nav(GN,-1,'Sign in')+body(e('','<div style="max-width:300px;margin:0 auto;display:grid;gap:8px">'+hd(50)+inp('Email')+inp('Password')+row([cb(0),'<span class="sub">Show password</span>'])+btn('Sign in',1)+row(['<u>Forgot password</u>',A(1)])+e('sep')+row([btn('Join with a class code'),A(2)])+'</div>')),
+ ['"Forgot password" sends a reset link. No security questions.','Learners with a class code go straight to the join page, not a separate sign-up.']);
+
+add('all','Before signing in','join','Create account or join a class','/join',
+ nav(GN,-1,'Sign in')+body(e('','<div style="max-width:340px;margin:0 auto;display:grid;gap:8px">'+hd(55)+row(['I am a:',chip('Learner',1),chip('Teacher'),A(1)])+inp('Name')+inp('Email')+inp('Password')+row([inp('Class code (optional)'),A(2)])+row([cb(0),'<span class="sub">I agree to the privacy notice</span>',A(3)])+btn('Create account',1)+'</div>')),
+ ['Role is chosen first, because teachers see an extra step to verify their school.','Learners can add a class code now or later in Settings.','The privacy notice is shown here in plain language. Learners are minors, so ask only for the data you need.']);
+
+add('all','Before signing in','states','Loading, empty and error states','Used on every page',
+ body(cols('repeat(3,1fr)',[
+  blk('<b>Loading</b>'+ph(50,'')+lines(3)+row([A(1)])),
+  blk('<b>Empty</b>'+ph(40,'Illustration')+ln(80)+btn('Clear filters')+row([A(2)])),
+  blk('<b>Error</b>'+ln(90)+ln(70)+btn('Try again',1)+row([A(3)]))])),
+ ['Skeleton shapes match the final layout, so the page does not jump when content arrives.','An empty list says why it is empty and what to do next.','Errors say what went wrong and offer one clear action. They do not blame the learner.']);
+
+/* =============== LEARNER =============== */
+add('learner','Main pages','l-home','Home','/',
+ nav(LN,0)+body(
+  cols('1.3fr 1fr',[blk(P(row([hd(40),A(1)]),lines(2),ph(60,'Diagram preview'),btn('Start example',1)),1),blk(P(row([hd(60),A(2)]),row([ln(70),chip('Due Fri')]),row([ln(60),chip('Due next wk')])))]),
+  blk(P(row([hd(35),A(3)]),...STG.map(t=>row([`<span style="min-width:90px">${t}</span>`,mt(60),'<span>60%</span>'])))),
+  blk(P(row([hd(30),A(4)]),ln(90),ln(80),ln(70)))
+ ),
+ ['Next best example, with one line on why it was chosen.','Work assigned by the teacher, with due dates. Shown only if the learner is in a class.','Mastery for each thinking stage. The weakest stage is marked.','Recent attempts. Selecting one opens the result page for that attempt.']);
+
+add('learner','Main pages','l-examples','Examples list','/examples',
+ nav(LN,1)+body(
+  row([inp('Search examples'),A(1),chip('Grade 11',1),chip('Topic'),chip('Theorem'),chip('Difficulty'),chip('Not done yet'),A(2)]),
+  cols('repeat(3,1fr)',[0,1,2,3,4,5].map(i=>blk(P(ph(60,'Thumbnail'),hd(70),row([chip('Circle'),chip(['Easy','Medium','Hard'][i%3])]),`<div class="sub">${i%3===0?'Done':i%3===1?'In progress':'Not started'}</div>`)))),
+  row([btn('Load more'),A(3),'<span class="sub">Showing 9 of 4,812</span>'])),
+ ['Search by title or term.','Filters are saved in the address, so a filtered list can be shared and the back button works.','Pages load more as needed. Large lists use virtual scrolling.']);
+
+add('learner','Solving an example','l-s1','Solver, stage 1: Abstraction','/examples/:id?stage=abstraction',
+ solver(0,blk(P(ph(170,'Diagram: highlights follow the facts you tap'),A(1))),
+  e('','<div style="display:grid;gap:8px">'+row([hd(55),A(2)])+ln(95)+ln(70)+row([chip('O is the centre',1),chip('∠ACB = 35°'),chip('Find ∠OAB'),chip('Length of CA'),chip('Length of CB'),A(3)])+`<div class="sub">Feedback appears here ${'&nbsp;'}</div>`+solverActions()+row([A(4)])+'</div>')),
+ ['The diagram is always visible. Tapped facts highlight on it.','Task heading and one line on why this stage matters.','Facts to choose from: the needed ones plus distractors.','"Next stage" is disabled until the stage is correct. "Guide me" and "Hint" are always available and are counted.'],'Stage 1 of 4');
+
+add('learner','Solving an example','l-s2','Solver, stage 2: Decomposition','/examples/:id?stage=decomposition',
+ solver(1,blk(P(ph(170,'Diagram: selected parts highlight'),A(1))),
+  e('','<div style="display:grid;gap:8px">'+row([hd(55)])+ln(90)+cols('repeat(3,1fr)',['Angles at O and C','Triangle OAB','Triangle ABC'].map((t,i)=>blk(P(ph(55,'Sub-diagram'),`<div class="sub">${t}</div>`,row([cb(i<2)]))))) +row([A(2)])+solverActions()+'</div>')),
+ ['The full diagram stays on screen so the learner sees where each part comes from.','Sub-diagrams to choose from. One is a distractor. Feedback names why a wrong part does not help.']);
+
+add('learner','Solving an example','l-s3','Solver, stage 3: Pattern recognition','/examples/:id?stage=patterns',
+ solver(2,blk(P(ph(170,'Diagram: part highlights when its row is focused'),A(1))),
+  e('','<div style="display:grid;gap:8px">'+hd(55)+ln(90)+blk(row([ph(50,'Part A','width:70px'),'<div style="flex:1;display:grid;gap:4px"><span class="sub">Angles at O and C</span>'+inp('Choose a theorem ▾')+'</div>',A(2)]))+blk(row([ph(50,'Part B','width:70px'),'<div style="flex:1;display:grid;gap:4px"><span class="sub">Triangle OAB</span>'+inp('Choose a theorem ▾')+'</div>']))+row(['<u>Open theorem</u>',A(3)])+solverActions()+'</div>')),
+ ['The matching part of the diagram highlights as the learner works on each row.','One row per part chosen in stage 2.','Opens the theorem in a side panel without losing progress.']);
+
+add('learner','Solving an example','l-s4','Solver, stage 4: Solve','/examples/:id?stage=solve',
+ solver(3,blk(P(ph(170,'Diagram: highlights the angles for the current step'),A(1))),
+  e('','<div style="display:grid;gap:8px">'+tbl('28px 1fr 1fr',['#','Statement','Reason'],[[ '✓','∠AOB = 70°','∠ at centre'],['✓','OA = OB','Radii'],['3','Choose below','Choose below'],['4','','']])+row([A(2)])+blk(P('<b>Statement</b>',row([chip('∠OAB = ∠OBA'),chip('∠OAB = ∠ACB'),chip('∠OAB = 90°')]),'<b>Reason</b>',row([chip('Angles opposite equal sides'),chip('Same segment'),chip('Tangent ⟂ radius')])))+row([A(3)])+solverActions()+'</div>')),
+ ['Highlights change with the selected step.','Steps 1 and 2 are filled in from the patterns found in stage 3. The next step is marked.','The learner picks both statement and reason. Feedback is per step.']);
+
+add('learner','Solving an example','l-result','Result','/examples/:id/result',
+ solverBar+body(blk(P(row([hd(40),A(1)]),lines(1)),1),
+  cols('1fr 1fr',[blk(P('<b>Thinking stages</b>',...STG.map(t=>row([`<span style="min-width:100px">${t}</span>`,'✓','<span class="sub">0 hints</span>'])),row([A(2)]))),blk(P('<b>Mastery</b>',row(['Angle at centre',mt(70),'+4%']),row(['Isosceles triangle',mt(80),'+2%']),row([A(3)])))]),
+  blk(P(row(['<b>Worked solution</b>','<span class="sub">tap to open</span>',A(4)]))),
+  row([btn('Next example',1),btn('Try again'),btn('Practise this theorem')])),
+ ['Clear completion message. No pass or fail wording.','Each thinking stage shows whether it was right first time and how many guides or hints were used.','Mastery changes are shown so effort feels visible.','The worked solution is collapsed by default, so learners try first.']);
+
+add('learner','Solving an example','l-panel','Side panel: theorem or definition','Opens over any solver stage',
+ solverBar+e('wgrid',P(e('dim',body(stageBar(2),ph(120,'Solver (dimmed)'),lines(3))),e('drawer',P(row([tabs(['Theorem','Definition'],0),A(1)]),hd(60),lines(2),ph(80,'Mini interactive diagram'),row([sl(60),A(2)]),btn('Back to problem',1))))   ,'grid-template-columns:1.4fr 1fr'),
+ ['Theorem and Definition tabs. Opens from any underlined term or "Open theorem" link.','A small version of the theorem diagram with one slider, so the learner can check the idea without leaving the problem. Closing it returns to the exact stage.']);
+
+add('learner','Main pages','l-defs','Definitions','/definitions',
+ nav(LN,2)+body(row([inp('Search a term'),A(1),chip('All',1),chip('Circles'),chip('Triangles'),chip('Quadrilaterals')]),
+  e('wgrid',P(...Array.from({length:8},(_,i)=>blk(P(ph(45,'Mini diagram'),hd(55),ln(90))))),'grid-template-columns:repeat(4,1fr)'),
+  blk(P(row([hd(30),A(2)]),'<div class="sub">Detail panel: longer explanation, diagram, related theorems, examples using this term</div>',row([btn('See related theorems')])))),
+ ['Search filters as the learner types.','Selecting a term opens a detail panel with related theorems and examples. On mobile it is a full screen.']);
+
+add('learner','Main pages','l-theorems','Theorems list','/theorems',
+ nav(LN,3)+body(row([chip('All',1),chip('Circle geometry'),chip('Triangles'),chip('Similarity'),A(1)]),
+  '<b>Circle geometry</b>',
+  cols('repeat(3,1fr)',[0,1,2].map(i=>blk(P(ph(55,'Diagram'),hd(70),ln(90),row([mt(40+i*20),'<span class="sub">mastery</span>',A(i===0?2:0).replace(/<b class="ann">0<\/b>/,'')]),btn('Explore',1))))),
+  '<b>Triangles</b>',
+  cols('repeat(3,1fr)',[0,1].map(()=>blk(P(ph(55,'Diagram'),hd(70),ln(90),btn('Explore',1)))))),
+ ['Grouped by topic. Chips jump to a group.','Each card shows the learner\'s mastery of that theorem (only when signed in).']);
+
+add('learner','Main pages','l-theorem','Theorem page','/theorems/:id',
+ nav(LN,3)+body(row([hd(40),A(1)]),lines(1),
+  cols('1.3fr 1fr',[ph(190,'Interactive diagram (SVG)'),blk(P('<b>Controls</b>',row([cb(1),'Show angles',A(2)]),row([cb(1),'Show radii']),row(['Radius',sl(70)]),row(['∠AOB',sl(40)]),row(['Move C',sl(50)]),e('sep'),'<div class="sub">∠AOB = 70° &nbsp; ∠ACB = 35.0° &nbsp; Ratio 2.00</div>',row([A(3)])))]),
+  row([btn('Practise this theorem',1),btn('Open in GeoGebra'),A(4)]),
+  blk(P('<b>Examples that use this theorem</b>',row([ph(34,'','width:50px'),ln(50),chip('Medium')]),row([ph(34,'','width:50px'),ln(40),chip('Hard')])))),
+ ['Theorem statement in plain words, with the diagram below it.','Toggles for angles and radii, plus sliders for radius, angle size and the position of point C.','A live readout shows the measurements and the ratio, so the theorem can be checked by eye and by number.','"Open in GeoGebra" loads GeoGebra only when pressed.']);
+
+add('learner','Main pages','l-ggb','Theorem page, GeoGebra open','/theorems/:id (after pressing the button)',
+ nav(LN,3)+body(row([hd(40)]),
+  cols('1.8fr 1fr',[ph(210,'GeoGebra applet (loaded on demand)'),blk(P('<b>Loading</b>',ln(80),ln(60),'<div class="sub">Shown while the script downloads. If it fails: message and a retry button.</div>',row([A(1)]),btn('Close GeoGebra')))]),
+  row([A(2),'<span class="sub">Own SVG diagram is hidden while GeoGebra is open</span>'])),
+ ['A skeleton and a retry state. Slow school connections are the reason GeoGebra is not loaded up front.','Only one diagram is active at a time, so the page stays light.']);
+
+add('learner','Main pages','l-approach','Approach','/approach',
+ nav(LN,4)+body(row([hd(45)]),lines(1),
+  ...[0,1,2,3].map(i=>blk(row([`<span class="wb ${i<4?'p':''}">${i+1}</span>`,'<div style="flex:1;display:grid;gap:4px">'+hd(40)+'<div class="sub">Ask yourself: …</div>'+'</div>',i===0?A(1):'']))),
+  blk(row(['<span class="wb">5</span>','<div style="flex:1;display:grid;gap:4px">'+hd(35)+'<div class="sub">Reflect and check. If not, return to step 1.</div></div>',A(2)])),
+  btn('Try it on an example',1)),
+ ['The first four steps are the same four stages used in every example, shown with the same names.','A final reflection step that loops back to the start.']);
+
+add('learner','Progress','l-p1','Progress tab: By theorem','/progress',
+ nav(LN,5)+body(tabs(['By theorem','By thinking stage','History'],0),
+  row([chip('All topics',1),chip('Circle geometry'),chip('Due for review'),A(1)]),
+  cols('repeat(3,1fr)',[0,1,2,3,4,5].map(i=>blk(P(hd(60),`<div style="font-size:16px;font-weight:700">${[88,62,45,74,81,18][i]}%</div>`,mt([88,62,45,74,81,18][i]),`<div class="sub">${i===1||i===2?'Review due':'On track'}</div>`)))),row([A(2)])),
+ ['Filter by topic or show only what is due for review.','Each tile shows a percentage and a text label, so meaning does not depend on colour. Selecting a tile opens practice examples for that theorem.']);
+
+add('learner','Progress','l-p2','Progress tab: By thinking stage','/progress?tab=stages',
+ nav(LN,5)+body(tabs(['By theorem','By thinking stage','History'],1),
+  cols('1.2fr 1fr',[blk(P(...STG.map(t=>row([`<span style="min-width:100px">${t}</span>`,mt(50),'<span>50%</span>'])),row([A(1)]))),ph(110,'Line chart: stage mastery over time')]),
+  blk(P(row([hd(30),A(2)]),lines(2),btn('Practise this stage',1)))),
+ ['One meter per thinking stage. This is the view that the original projects did not have.','A short, specific tip for the weakest stage, with a button to practise it.']);
+
+add('learner','Progress','l-p3','Progress tab: History','/progress?tab=history',
+ nav(LN,5)+body(tabs(['By theorem','By thinking stage','History'],2),
+  tbl('1.4fr 1fr 1.6fr .6fr .8fr',['Example','Date','Stages','Hints','Result'],[['Find ∠OAB','12 Mar','✓ ✓ ✓ ✓','1','Done'],['Tangent and radius','11 Mar','✓ ✓ ✗ –','2','Not done'],['Cyclic quad','10 Mar','✓ ✓ ✓ ✓','0','Done']]),
+  row([A(1),btn('Load more')])),
+ ['Each row shows which stages were right. Selecting a row opens its result page.']);
+
+add('learner','Account','l-settings','Settings','/settings',
+ nav(LN,-1,'Account ▾')+body(cols('1fr 1fr',[blk(P('<b>Profile</b>',inp('Name'),inp('Email'),btn('Change password'))),blk(P('<b>My classes</b>',row([ln(60),btn('Leave')]),row([inp('Class code'),btn('Join'),A(1)])))]),
+  cols('1fr 1fr',[blk(P('<b>Appearance</b>',row(['Theme',chip('System',1),chip('Light'),chip('Dark')]),row(['Text size',chip('Normal',1),chip('Large'),A(2)]))),blk(P('<b>My data</b>',btn('Download my data'),btn('Delete my account'),row([A(3)])))])),
+ ['A learner can belong to more than one class.','Text size and theme are saved to the account and apply immediately.','Download and deletion are self-service. Deletion asks for confirmation and explains what happens to class results.']);
+
+
+add('learner','Mobile','l-m-solve','Mobile: solver (Solve stage)','Phone width',
+ e('','<div style="padding:10px;display:grid;gap:8px">'+row(['<span class="sub">Find ∠OAB</span>','<span class="wb" style="margin-left:auto">Exit</span>'])+row(STG.map((t,i)=>`<span class="wc ${i===3?'on':''}">${i+1}</span>`))+ph(110,'Diagram, pinned (tap to enlarge)')+row([A(1)])+tbl('24px 1fr 1fr',['#','Statement','Reason'],[['✓','∠AOB = 70°','∠ at centre'],['3','…','…']])+e('blk hi',P('<b>Statement</b>',row([chip('∠OAB = ∠OBA'),chip('∠OAB = ∠ACB')]),'<b>Reason</b>',row([chip('Opposite equal sides'),chip('Same segment')])))+row([A(2)])+row([btn('Check',1),btn('Guide'),btn('Hint')])+'</div>'+e('wnav','<span>Home</span><span class="on">Examples</span><span>Theorems</span><span>Progress</span>','justify-content:space-around;border-top:2px solid var(--ink);border-bottom:0')+'')
+ ,['The diagram stays pinned at the top and shrinks as the learner scrolls, but can always be enlarged.','Choices appear in a panel at the bottom. Touch targets are at least 44 px.'],'Phone');
+W[W.length-1].phone=true;
+
+add('learner','Mobile','l-m-theorem','Mobile: theorem page','Phone width',
+ e('','<div style="padding:10px;display:grid;gap:8px">'+hd(60)+lines(2)+ph(150,'Interactive diagram')+blk(P(row([cb(1),'Show angles']),row(['Radius',sl(70)]),row(['∠AOB',sl(40)]),row(['Move C',sl(50)]),row([A(1)])))+'<div class="sub">∠AOB = 70° &nbsp; ∠ACB = 35°</div>'+btn('Practise this theorem',1)+'</div>'+e('wnav','<span>Home</span><span>Examples</span><span class="on">Theorems</span><span>Progress</span>','justify-content:space-around;border-top:2px solid var(--ink);border-bottom:0')),
+ ['Sliders sit directly under the diagram, so the learner can drag and watch at the same time. Bottom tab bar replaces the top navigation on phones.'],'Phone');
+W[W.length-1].phone=true;
+
+/* =============== TEACHER =============== */
+add('teacher','Classes','t-classes','Classes','/classes',
+ nav(TN,0)+body(row([hd(25),btn('Create class',1),A(1)],'justify-content:space-between'),
+  cols('repeat(2,1fr)',[0,1].map(i=>blk(P(hd(50),row([chip('Code: AB12CD'),A(i===0?2:0).replace(/<b class="ann">0<\/b>/,'')]),row(['<span class="sub">32 learners</span>','<span class="sub">Active today: 18</span>']),'<div class="sub">Weakest stage: Patterns</div>',row([btn('Open',1),btn('Copy code')]))))),
+  ),
+ ['Create class opens a short form.','Each class shows its join code and the weakest thinking stage at a glance.']);
+
+add('teacher','Classes','t-create','Create class (dialog)','/classes (overlay)',
+ e('','<div style="padding:12px;max-width:340px;margin:0 auto;display:grid;gap:8px;border:2px solid var(--ink);border-radius:8px;margin:12px auto">'+row([hd(40),'<span class="wb" style="margin-left:auto">×</span>'])+inp('Class name')+row([inp('Grade ▾'),inp('Year ▾')])+row(['Topics',chip('Circle geometry',1),chip('Triangles'),A(1)])+blk(P('<b>Join code</b>',row(['<span style="font-size:15px;letter-spacing:2px">AB12CD</span>',btn('Copy'),A(2)])))+row([btn('Cancel'),btn('Create class',1)],'justify-content:flex-end')+'</div>'),
+ ['Topics select what the class heatmap and recommendations focus on. Can be changed later.','The code is generated and shown immediately. Learners type it on the join page.']);
+
+const classHead=(act)=>nav(TN,0)+body(row([hd(25),'<span class="wc">Class 11B</span>',btn('Class settings')]),tabs(['Heatmap','Learners','Examples','Assignments','Live quiz','Export'],act));
+add('teacher','Class page tabs','t-heat1','Tab: Heatmap, by theorem','/classes/:id/heatmap',
+ classHead(0)+body(row([chip('By theorem',1),chip('By thinking stage'),A(1),'<span style="margin-left:auto">',inp('Topic ▾'),'</span>']),
+  cols('1.6fr 1fr',[e('wgrid',P('<div></div>',...['Centre','Segment','Cyclic','Tangent','Chord'].map(t=>`<div class="sub" style="text-align:center">${t}</div>`),...Array.from({length:8},(_,r)=>`<div class="sub">Learner ${r+1}</div>`+heat(1,5))),'grid-template-columns:70px repeat(5,1fr);gap:4px'),blk(P('<b>What the class needs</b>',lines(3),btn('Assign examples',1),row([A(2)])))])),
+ ['Switch between theorem view and thinking-stage view. The grid keeps its layout, so the teacher can compare.','The side card turns the data into one suggested action. Learners are sortable by any column, so those who need help come first.']);
+
+add('teacher','Class page tabs','t-heat2','Tab: Heatmap, by thinking stage','/classes/:id/heatmap?view=stages',
+ classHead(0)+body(row([chip('By theorem'),chip('By thinking stage',1)]),
+  cols('1.6fr 1fr',[e('wgrid',P('<div></div>',...STG.map(t=>`<div class="sub" style="text-align:center">${t}</div>`),...Array.from({length:8},(_,r)=>`<div class="sub">Learner ${r+1}</div>`+heat(1,4))),'grid-template-columns:70px repeat(4,1fr);gap:4px'),blk(P('<b>Class summary</b>',...STG.map(t=>row([`<span style="min-width:90px">${t}</span>`,mt(55)])),row([A(1)])))])),
+ ['The class average per stage. This shows whether the problem is reading the diagram, splitting it, recognising theorems or writing the proof.']);
+
+add('teacher','Class page tabs','t-learners','Tab: Learners','/classes/:id/learners',
+ classHead(1)+body(row([inp('Search learners'),chip('Needs help',1),A(1),chip('Not active this week')]),
+  tbl('1.4fr 1fr 1fr 1.2fr .8fr',['Name','Last active','Examples done','Weakest stage','Flag'],[...Array.from({length:5},(_,i)=>[`Learner ${i+1}`,'Today','12',['Patterns','Solve','Patterns','Decomposition','Patterns'][i],i===1||i===3?'Needs help':''])]),row([A(2)])),
+ ['"Needs help" combines low scores, many hints and no recent activity.','Selecting a learner opens their detail page.']);
+
+add('teacher','Class page tabs','t-learner','Learner detail','/classes/:id/learners/:uid',
+ nav(TN,0)+body(row([btn('Back'),hd(25),'<span class="wc">Class 11B</span>']),
+  cols('1fr 1fr',[blk(P('<b>Thinking stages</b>',...STG.map(t=>row([`<span style="min-width:90px">${t}</span>`,mt(50)])),row([A(1)]))),blk(P('<b>Theorem mastery</b>',...[1,2,3].map(()=>row([ln(50),mt(60)])),btn('Assign practice',1)))]),
+  blk(P('<b>Attempts</b>',tbl('1.4fr 1fr 1.6fr .6fr',['Example','Date','Stages','Hints'],[['Find ∠OAB','12 Mar','✓ ✓ ✓ ✓','1'],['Cyclic quad','10 Mar','✓ ✓ ✗ –','3']]),row([A(2)])))),
+ ['Same stage meters the learner sees, so teacher and learner talk about the same thing.','Selecting an attempt opens the learner\'s answers step by step, so the teacher can see exactly where they went wrong.']);
+
+add('teacher','Class page tabs','t-examples','Tab: Examples','/classes/:id/examples',
+ classHead(2)+body(row([chip('Hardest first',1),chip('Most attempted'),A(1)]),
+  cols('1fr 1.1fr',[tbl('1.6fr .8fr 1fr',['Example','Correct','Most missed'],[['Cyclic quad proof','38%','Patterns'],['Tangent and chord','44%','Solve'],['Same segment','51%','Decomp.']]),blk(P(row([hd(40),A(2)]),'<b>Where learners stop</b>',...STG.map((t,i)=>row([`<span style="min-width:90px">${t}</span>`,mt(95-i*18)])),'<div class="sub">Most chosen wrong answer: "Angles in the same segment"</div>'))])),
+ ['Sort by difficulty or by attempts.','Selecting an example shows a funnel: how many learners got through each stage, and the most common wrong answer. This is the content a teacher can act on in the next lesson.']);
+
+add('teacher','Class page tabs','t-assign','Tab: Assignments','/classes/:id/assignments',
+ classHead(3)+body(row([hd(25),btn('New assignment',1)],'justify-content:space-between'),
+  cols('1fr 1fr',[blk(P('<b>Current</b>',row([ln(60),chip('Due Fri'),'<span class="sub">24/32 done</span>']),row([ln(50),chip('Due Mon'),'<span class="sub">9/32 done</span>']))),blk(P('<b>New assignment</b>',inp('Choose by: Theorem ▾'),inp('Examples ▾'),row([inp('Due date'),inp('Class ▾')]),row([cb(1),'Let weakest learners get extra examples',A(1)]),btn('Assign',1)))])),
+ ['Optional: add easier examples for learners who are behind, without singling them out in the learner view.']);
+
+add('teacher','Class page tabs','t-live1','Tab: Live quiz, setup and lobby','/classes/:id/live',
+ classHead(4)+body(cols('1fr 1fr',[blk(P('<b>Set up</b>',inp('Examples or questions ▾'),row(['Time per question',sl(40)]),btn('Launch quiz',1),row([A(1)]))),blk(P('<b>Lobby</b>',row(['<span style="font-size:20px;letter-spacing:3px">482 913</span>',A(2)]),'<div class="sub">Joined: 32 of 40</div>',row([chip('Aisha'),chip('Ben'),chip('Carlos'),chip('…')]),btn('Start',1)))])),
+ ['Teacher picks questions from the library and the time limit.','Learners join with a short code. The joined count updates live.'],'Later phase');
+
+add('teacher','Class page tabs','t-live2','Live quiz, running','/classes/:id/live/:session',
+ nav(TN,0)+body(row(['<span class="sub">Question 3 of 8, 12 s left</span>',mt(60)]),
+  cols('1fr 1fr',[ph(130,'Question diagram'),blk(P('<b>32 of 40 answered</b>',e('wrow','<div style="width:18%;height:30px;border:1.5px solid var(--ink2);background:var(--line)"></div><div style="width:22%;height:45px;border:1.5px solid var(--ink2);background:var(--line)"></div><div style="width:18%;height:90px;border:1.5px solid var(--ink);background:var(--ink2)"></div><div style="width:18%;height:10px;border:1.5px solid var(--ink2);background:var(--line)"></div>','align-items:flex-end;gap:6px'),row(['A','B','C ✓','D'],'justify-content:space-around'),row([A(1)])))]),
+  row([btn('Show answer',1),btn('Next question'),btn('End quiz')])),
+ ['The chart updates in batches, not on every answer, so the screen stays smooth with 40 learners.'],'Later phase');
+
+add('teacher','Class page tabs','t-export','Tab: Export','/classes/:id/export',
+ classHead(5)+body(cols('1fr 1.3fr',[blk(P('<b>Report</b>',row([chip('Class summary',1),chip('Per learner'),chip('Per example')]),row(['Dates',inp('1 Feb – 31 Mar')]),row(['Format',chip('PDF',1),chip('CSV')]),btn('Download',1),row([A(1)]))),blk(P('<b>Preview</b>',tbl('1fr 1fr 1fr',['Learner','Examples','Weakest'],[['…','…','…'],['…','…','…']])))])),
+ ['Large reports are prepared in the background and the teacher is notified when ready, instead of waiting on the page.']);
+
+add('teacher','Library','t-library','Library (view as learner)','/library/*',
+ nav(TN,1)+body(row([chip('Examples',1),chip('Theorems'),chip('Definitions'),chip('Approach'),A(1)]),
+  cols('repeat(3,1fr)',[0,1,2].map(()=>blk(P(ph(55,'Thumbnail'),hd(60),row([chip('Medium'),btn('Preview')]))))),
+  row([A(2),btn('Assign selected',1)])),
+ ['Same pages learners see, shown inside the teacher area, so teachers can try an example before assigning it.','Items can be assigned straight from the library.']);
+
+add('teacher','Reports','t-reports','Reports (all classes)','/reports',
+ nav(TN,2)+body(row([chip('All classes',1),chip('Class 11B'),chip('Class 12A')]),
+  cols('1fr 1fr',[blk(P('<b>Stage averages across classes</b>',ph(90,'Bar chart'))),blk(P('<b>Hardest examples overall</b>',lines(4)))]),
+  row([btn('Export',1),A(1)])),
+ ['A teacher with several classes sees the picture across all of them.']);
+
+/* =============== AUTHOR =============== */
+const authorList=(act,cols_,rows)=>nav(AN,act,'Account')+body(row([tabs(AN,act),btn('New '+['example','theorem','definition'][act],1)],'justify-content:space-between'),row([inp('Search'),chip('Draft'),chip('In review'),chip('Published',1),A(1)]),tbl(cols_[0],cols_[1],rows));
+add('author','Content lists','a-examples','Examples list','/author/examples',
+ authorList(0,['1.6fr 1fr .8fr .8fr 1fr',['Title','Topic','Level','Status','Updated']],[['Find ∠OAB','Circle','Medium','Published','Today'],['Tangent and radius','Circle','Easy','Draft','Mon'],['Cyclic quad','Circle','Hard','In review','Mar 3']]),
+ ['Status filters show what is draft, awaiting review and live. A published example appears in Examples straight away.']);
+add('author','Content lists','a-theorems','Theorems list','/author/theorems',
+ authorList(1,['1.6fr 1fr 1fr 1fr',['Theorem','Topic','Examples using it','Status']],[['Angle at centre','Circle','14','Published'],['Same segment','Circle','11','Published']]),
+ ['Shows how many examples use each theorem, so authors can see where more practice is needed.']);
+add('author','Content lists','a-defs','Definitions list','/author/definitions',
+ authorList(2,['1.6fr 1fr 1fr',['Term','Topic','Status']],[['Chord','Circle','Published'],['Subtend','Circle','Draft']]),
+ ['Terms used in examples but not yet defined are flagged here.']);
+
+const exEd=(act,inner)=>nav(AN,0)+body(row([btn('Back'),hd(25),'<span class="wc">Draft</span>',btn('Save draft')]),tabs(['Diagram','Stages','Steps','Preview and publish'],act),inner);
+add('author','Example editor','a-e1','Example editor tab: Diagram','/author/examples/:id/diagram',
+ exEd(0,cols('1fr 1fr',[blk(P('<b>Diagram data</b>',btn('Import from GeoGebra'),A(1),'<div class="wi" style="height:100px">{ "points": …, "lines": …, "angles": … }</div>',row([A(2),'<span class="sub">Valid ✓</span>']))),blk(P('<b>Live preview</b>',ph(130,'Rendered diagram'),row([chip('Show labels',1),chip('Show angles',1)])))])),
+ ['Paste or import the diagram from GeoGebra. It is turned into the app\'s diagram format.','Validation runs as the author types, for example: every line refers to existing points.']);
+add('author','Example editor','a-e2','Example editor tab: Stages','/author/examples/:id/stages',
+ exEd(1,P(cols('1fr 1fr',[blk(P('<b>1. Facts</b>',row([cb(1),'O is the centre','<span class="sub">needed</span>']),row([cb(1),'∠ACB = 35°','<span class="sub">needed</span>']),row([cb(0),'Length of CA','<span class="sub">distractor</span>']),btn('Add fact'),A(1))),blk(P('<b>2. Sub-diagrams</b>',row([ph(30,'','width:40px'),'Angles at O and C',cb(1)]),row([ph(30,'','width:40px'),'Triangle OAB',cb(1)]),row([ph(30,'','width:40px'),'Triangle ABC',cb(0),'<span class="sub">distractor</span>']),A(2)))]),blk(P('<b>3. Patterns</b>',row(['Angles at O and C →',inp('Angle at centre ▾')]),row(['Triangle OAB →',inp('Isosceles triangle ▾')]),A(3))))),
+ ['Each fact is marked needed or distractor, and ties to a highlight on the diagram.','Sub-diagrams are made by choosing which points and lines to keep.','Each sub-diagram is linked to a theorem from the library. This link feeds mastery per theorem.']);
+add('author','Example editor','a-e3','Example editor tab: Steps','/author/examples/:id/steps',
+ exEd(2,P(tbl('28px 1.2fr 1.2fr .8fr',['#','Statement','Reason','Highlight'],[['1','∠AOB = 70°','∠ at centre','angO'],['2','OA = OB','Radii','radii'],['3','∠OAB = ∠OBA','Opposite equal sides','angA']]),blk(P(row(['<b>Step 3: wrong options</b>',A(1)]),row([inp('∠OAB = ∠ACB'),inp('Same segment')]),inp('Hint: "Look at triangle OAB…"'),row([A(2)]))),btn('Add step'))),
+ ['Wrong options are written by the author so feedback can explain why each one is wrong.','Every step has a hint and a list of diagram highlights. Hints are written in the same order they would be given.']);
+add('author','Example editor','a-e4','Example editor tab: Preview and publish','/author/examples/:id/publish',
+ exEd(3,cols('1fr 1fr',[blk(P('<b>Check list</b>',row([cb(1),'Diagram valid']),row([cb(1),'All four stages set']),row([cb(1),'Steps have hints']),row([cb(0),'Reviewed by second author',A(1)]))),blk(P('<b>Preview</b>',ph(90,'Learner view'),row([btn('Open as learner'),btn('Save draft'),btn('Submit for review',1),A(2)])))])),
+ ['Publishing is blocked until the list is complete. A second author review is recommended, because a wrong proof harms learners.','Authors can walk through the example exactly as a learner does.']);
+add('author','Theorem editor','a-theorem','Theorem editor','/author/theorems/:id',
+ nav(AN,1)+body(row([btn('Back'),hd(25),btn('Save',1)]),
+  cols('1fr 1fr',[blk(P(inp('Name'),inp('Topic ▾'),'<div class="wi" style="height:44px">Statement in plain words</div>',row([A(1),'<b>Controls</b>']),row([cb(1),'Angle toggle']),row([cb(1),'Radii toggle']),row([inp('Slider: Radius'),inp('60'),inp('105')]),btn('Add slider'),A(2))),blk(P('<b>Preview</b>',ph(130,'Interactive diagram'),row([sl(60),sl(40)]),inp('GeoGebra file ID (optional)'),A(3)))])),
+ ['Statement is written for learners, not copied from a textbook.','The sliders and toggles shown on the theorem page are configured here, so adding a theorem does not need code changes.','A GeoGebra file can be linked for the "Open in GeoGebra" button.']);
+add('author','Definition editor','a-def','Definition editor','/author/definitions/:id',
+ nav(AN,2)+body(row([btn('Back'),hd(25),btn('Save',1)]),
+  cols('1fr 1fr',[blk(P(inp('Term'),'<div class="wi" style="height:50px">Definition</div>',inp('Topic ▾'),inp('Related theorems ▾'),A(1))),blk(P('<b>Preview card</b>',ph(60,'Mini diagram (highlighted part)'),hd(50),lines(2),A(2)))])),
+ ['Linking related theorems makes the definition popover in the solver able to offer "see theorem".','The diagram marks which part of the figure the term refers to.']);
+
+/* ---------- render ---------- */
+const roleNames={all:'Everyone',learner:'Learner',teacher:'Teacher',author:'Author'};
+const intro={all:'Pages and states anyone can see before they have an account, and the shared patterns used everywhere.',learner:'Everything a learner sees: the four main pages, the four-stage solver, progress and settings, plus phone layouts.',teacher:'Class management, the analytics tabs, assignments, live quiz and exports.',author:'Content lists and the editors for examples, theorems and definitions.'};
+function card(w){
+  const wf=w.phone?`<div class="wf phone">${w.html}</div>`:`<div class="wf">${w.html}</div>`;
+  return `<article class="wcard" id="${w.id}"><div class="whead"><h3>${w.title}</h3><code>${w.route}</code>${w.tag?`<span class="tag">${w.tag}</span>`:''}</div><div class="wcols">${wf}<ol class="notes">${w.notes.map(n=>`<li><span>${n}</span></li>`).join('')}</ol></div></article>`;
+}
+const host=document.getElementById('panels');
+host.innerHTML=Object.keys(roleNames).map((r,ri)=>{
+  const items=W.filter(w=>w.role===r);
+  const groups=[...new Set(items.map(w=>w.group))];
+  return `<section class="panel ${ri===0?'on':''}" id="p-${r}"><p class="lead" style="margin-bottom:10px">${intro[r]} <b>${items.length} wireframes.</b></p><div class="index">${items.map(w=>`<a href="#${w.id}">${w.title}</a>`).join('')}</div>`+groups.map(g=>`<div class="group">${g}</div>`+items.filter(w=>w.group===g).map(card).join('')).join('')+'</section>';
+}).join('');
+const btns=[...document.querySelectorAll('.roles button')];
+btns.forEach(b=>{b.textContent+=' ('+W.filter(w=>w.role===b.dataset.r).length+')';b.addEventListener('click',()=>{
+  btns.forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+b.dataset.r).classList.add('on');
+  window.scrollTo({top:document.querySelector('.roles').offsetTop-10});
+});});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EucliGeo prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#F5F8FB; --grid:rgba(36,87,214,.07); --card:#FFFFFF; --ink:#13233F; --ink2:#4A5A74; --line:#D3DDE9;
+  --blue:#2457D6; --blue-soft:#E3EBFD; --good:#1E8E5A; --good-soft:#DDF3E8; --bad:#C2413B; --bad-soft:#FBE4E2; --mark:#F2B705; --mark-soft:#FFF3C7;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --fs:17px;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--paper:#0E1626;--grid:rgba(125,162,255,.08);--card:#16213A;--ink:#E8EEF8;--ink2:#9AA9C2;--line:#2A3858;--blue:#7DA2FF;--blue-soft:#1F2F57;--good:#47C98A;--good-soft:#173A2D;--bad:#FF8A80;--bad-soft:#40201F;--mark:#F5C84B;--mark-soft:#43391A}
+}
+:root[data-theme="dark"]{--paper:#0E1626;--grid:rgba(125,162,255,.08);--card:#16213A;--ink:#E8EEF8;--ink2:#9AA9C2;--line:#2A3858;--blue:#7DA2FF;--blue-soft:#1F2F57;--good:#47C98A;--good-soft:#173A2D;--bad:#FF8A80;--bad-soft:#40201F;--mark:#F5C84B;--mark-soft:#43391A}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;color:var(--ink);font-family:var(--body);font-size:var(--fs);line-height:1.55}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.02em}
+h2{font-size:1.6rem;margin-bottom:6px}
+h3{font-size:1.08rem;margin-bottom:4px}
+p{margin:0 0 10px;max-width:66ch}
+a{color:var(--blue)}
+button{font:inherit;color:inherit}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+.muted{color:var(--ink2);font-size:.9rem}
+.center{text-align:center}
+
+/* prototype toolbar */
+#proto{position:sticky;top:0;z-index:30;background:var(--ink);color:var(--paper);padding:6px 14px;padding-top:calc(6px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85rem}
+#proto b{font-family:var(--display)}
+#proto button{border:1.5px solid color-mix(in srgb,var(--paper) 45%,transparent);background:transparent;color:var(--paper);border-radius:99px;padding:2px 12px;cursor:pointer;font-size:.85rem}
+#proto button[aria-pressed="true"]{background:var(--mark);border-color:var(--mark);color:#1b1500;font-weight:700}
+#proto .sp{margin-left:auto}
+
+/* app nav */
+#nav{background:var(--card);border-bottom:2px solid var(--line);position:sticky;top:34px;z-index:20}
+.navin{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:6px}
+.logo{font-family:var(--display);font-weight:700;font-size:1.1rem;padding:12px 10px 12px 0;text-decoration:none;color:var(--ink);white-space:nowrap}
+.links{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
+.links a{padding:13px 11px;text-decoration:none;color:var(--ink2);border-bottom:3px solid transparent;white-space:nowrap;font-size:.95rem}
+.links a[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--mark)}
+.acct{display:flex;gap:6px;align-items:center;white-space:nowrap}
+main{max-width:1100px;margin:0 auto;padding:26px 16px 90px}
+
+/* components */
+.btn{display:inline-block;font-family:var(--display);font-weight:700;background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:.95rem;cursor:pointer;text-decoration:none;line-height:1.3}
+.btn.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn.sm{padding:5px 11px;font-size:.85rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.danger{background:var(--bad)}
+.card{border:1.5px solid var(--line);border-radius:12px;padding:14px;background:var(--card);min-width:0}
+.card.hi{border-color:var(--blue);background:var(--blue-soft)}
+.card.click{cursor:pointer;text-decoration:none;color:inherit;display:block}
+.card.click:hover{border-color:var(--blue)}
+.pill{display:inline-block;border:1.5px solid var(--line);border-radius:999px;padding:0 10px;font-size:.8rem;color:var(--ink2);margin:0 4px 4px 0;background:var(--card)}
+.pill.ok{border-color:var(--good);color:var(--good)}.pill.warn{border-color:var(--mark);background:var(--mark-soft);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:.9rem;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;text-align:left}
+.chip.round{border-radius:99px;padding:4px 13px}
+.chip[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 1px var(--blue)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
+@media (max-width:820px){.grid2,.grid3,.grid4,.two{grid-template-columns:1fr!important}.grid2.keep{grid-template-columns:1fr 1fr!important}}
+.row{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.row:last-child{border-bottom:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;flex:1;min-width:60px}
+.meter i{display:block;height:100%;background:var(--blue)}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--line);margin:14px 0 16px;overflow-x:auto}
+.tabs a{padding:8px 14px;text-decoration:none;color:var(--ink2);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tabs a[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--blue)}
+.banner{background:var(--mark-soft);border-left:4px solid var(--mark);padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:.95rem}
+.fb{min-height:1.5em;font-size:.93rem;margin:8px 0 0}.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+input[type=text],input[type=email],input[type=password],input[type=search],input[type=date],textarea,select{font:inherit;font-size:.95rem;width:100%;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;min-height:130px}
+label.f{display:grid;gap:4px;font-size:.9rem;margin-bottom:10px}
+input[type=range]{flex:1;accent-color:var(--blue);min-width:0}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{text-align:left;padding:9px 10px;border-bottom:1.5px solid var(--line);vertical-align:middle}
+.tbl th{font-family:var(--display);font-size:.88rem}
+.tbl tr.click{cursor:pointer}.tbl tr.click:hover td{background:var(--blue-soft)}
+.scroll{overflow-x:auto}
+.empty{text-align:center;padding:30px 10px;color:var(--ink2)}
+
+/* diagrams */
+svg.dia{width:100%;height:auto;max-width:370px;display:block;margin:0 auto}
+.dia .c{fill:none;stroke:var(--ink);stroke-width:2}
+.dia .ln{stroke:var(--ink);stroke-width:2;fill:none}
+.dia .lbl{fill:var(--ink);font:700 15px var(--display)}
+.dia .ang{fill:var(--mark);fill-opacity:.45;stroke:var(--ink);stroke-width:1}
+.dia .hl{opacity:0;stroke:var(--mark);stroke-width:6;fill:none;stroke-linecap:round;transition:opacity .18s}
+.dia .hlf{opacity:0;fill:var(--mark);fill-opacity:.6;stroke:none;transition:opacity .18s}
+.mini{width:100%;height:auto;max-height:110px;display:block}
+.mini .c{fill:none;stroke:var(--ink);stroke-width:2}.mini .ln{stroke:var(--ink);stroke-width:2;fill:none}
+.mini .em{stroke:var(--blue);stroke-width:4;fill:none;stroke-linecap:round}.mini .emf{fill:var(--blue);fill-opacity:.3;stroke:var(--blue);stroke-width:3}
+
+/* solver */
+.stages{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px}
+.stg{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:999px;padding:4px 13px 4px 5px;font-family:var(--display);font-size:.88rem;background:var(--card)}
+.stg i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 .78rem var(--display);font-style:normal}
+.stg.cur{border-color:var(--mark);background:var(--mark-soft)}.stg.cur i{background:var(--mark);color:#1b1500}
+.stg.done i{background:var(--good);color:#fff}
+.task{font-family:var(--display);font-weight:700;font-size:1.1rem;margin-bottom:2px}
+.why{font-size:.9rem;color:var(--ink2);margin-bottom:10px}
+.subs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.subs{grid-template-columns:1fr 1fr}}
+.subc{border:1.5px solid var(--line);border-radius:10px;padding:8px;background:var(--card);cursor:pointer;text-align:left}
+.subc[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 1px var(--blue)}
+.subc small{display:block;font-size:.8rem;line-height:1.25;margin-top:4px}
+.proof{border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-top:6px}
+.step{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;padding:9px 10px;border-bottom:1.5px solid var(--line);align-items:center;font-size:.9rem;background:var(--card)}
+.step:last-child{border-bottom:0}
+.step .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 .78rem var(--display);background:var(--line)}
+.step.ok{background:var(--good-soft)}.step.ok .n{background:var(--good);color:#fff}
+.step.active{box-shadow:inset 4px 0 0 var(--mark)}
+.step small{display:block;color:var(--ink2);font-size:.75rem}
+.picker{padding:10px 12px;background:var(--mark-soft);border-radius:10px;margin-top:10px}
+.picker h4{font:700 .85rem var(--display);margin:4px 0 2px}
+.result{background:var(--good-soft);border:1.5px solid var(--good);border-radius:10px;padding:12px 14px;margin-top:12px}
+.ctrl{display:grid;gap:10px;margin-top:10px}
+.ctrl label{display:flex;align-items:center;gap:10px;font-size:.92rem}
+.ctrl label span{min-width:118px}
+.readout{font-family:var(--display);background:var(--mark-soft);border-left:4px solid var(--mark);padding:8px 12px;border-radius:0 8px 8px 0;margin-top:12px}
+.alg{counter-reset:a;display:grid;gap:10px}
+.alg .card{position:relative;padding-left:56px}
+.alg .card::before{counter-increment:a;content:counter(a);position:absolute;left:14px;top:12px;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font:700 .95rem var(--display)}
+.alg .card.ctc{border-color:var(--mark);background:var(--mark-soft)}.alg .card.ctc::before{background:var(--mark);color:#1b1500}
+.heat{display:grid;gap:3px;font-size:.8rem;overflow-x:auto}
+.heat div{padding:8px 4px;text-align:center;border-radius:4px;color:#10192b;font-weight:700;min-width:44px}
+.heat .h{background:none;color:var(--ink2);font-weight:400;font-size:.75rem}
+.heat .nm{background:none;color:var(--ink);text-align:left;font-weight:400;cursor:pointer;min-width:80px}
+.bars{display:flex;gap:10px;align-items:flex-end;height:130px;margin-top:26px}
+.bars div{flex:1;background:var(--blue);border-radius:6px 6px 0 0;position:relative;min-height:6px;transition:height .25s}
+.bars div.right{background:var(--good)}
+.bars span{position:absolute;top:-22px;left:0;right:0;text-align:center;font-size:.8rem}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(380px,100%);background:var(--card);border-left:2px solid var(--ink);z-index:50;padding:16px;overflow:auto;box-shadow:-8px 0 30px rgba(0,0,0,.2)}
+.scrim{position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:45}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 28px));background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:18px;z-index:50;max-height:90vh;overflow:auto}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(30px);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:10px;z-index:80;opacity:0;pointer-events:none;transition:all .22s;max-width:calc(100% - 30px);font-size:.93rem}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center;padding:30px 0}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.codebox{font-family:var(--display);font-size:2rem;letter-spacing:.25em;font-weight:700}
+.funnel div.r{display:flex;align-items:center;gap:10px;margin:6px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="proto"><b>Prototype</b><span>Viewing as:</span>
+  <button data-role="guest" aria-pressed="true">Visitor</button><button data-role="learner" aria-pressed="false">Learner</button><button data-role="teacher" aria-pressed="false">Teacher</button><button data-role="author" aria-pressed="false">Author</button>
+  <button class="sp" id="reset">Reset prototype</button></div>
+<header id="nav"></header>
+<main id="view"></main>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="overlay"></div>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const timers=[];const clearTimers=()=>{while(timers.length)clearInterval(timers.pop())};
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+
+/* ---------------- data ---------------- */
+function freshState(){return{role:'guest',name:'Thandi',
+  mastery:{'Angle at the centre':88,'Tangent ⟂ radius':74,'Angles in the same segment':62,'Cyclic quadrilateral':45,'Alternate segment':18,'Isosceles triangle':81,'Angles in a triangle':77},
+  stageM:[82,64,48,55],done:{},history:[{t:'Cyclic quadrilateral',date:'10 Mar',st:[1,1,1,1],hints:0,ex:0},{t:'Same segment',date:'8 Mar',st:[1,1,0,0],hints:2,ex:0}],
+  assigned:[{t:'Tangents to a circle',due:'Fri',ex:2},{t:'Similar triangles',due:'next week',ex:0}],
+  classes:[{id:1,name:'Class 11B',grade:11,code:'AB12CD',n:32,weak:'Patterns'},{id:2,name:'Class 12A',grade:12,code:'QW98ZX',n:28,weak:'Solve'}],
+  joined:[{name:'Class 11B',code:'AB12CD'}],f:{topic:'All',level:'All',undone:false},defSel:null,thm:{},
+  authorEx:[{t:'Find ∠OAB',topic:'Circle',lvl:'Medium',st:'Published',up:'Today'},{t:'Tangent and radius',topic:'Circle',lvl:'Easy',st:'Published',up:'Mon'},{t:'Cyclic quadrilateral',topic:'Circle',lvl:'Hard',st:'Draft',up:'Mar 3'},{t:'Same segment',topic:'Circle',lvl:'Medium',st:'In review',up:'Mar 1'}],
+  authorTh:[{t:'Angle at the centre',topic:'Circle',n:14,st:'Published'},{t:'Tangent ⟂ radius',topic:'Circle',n:9,st:'Published'},{t:'Same segment',topic:'Circle',n:11,st:'Published'}],
+  authorDef:[{t:'Chord',topic:'Circle',st:'Published'},{t:'Subtend',topic:'Circle',st:'Draft'}],
+  checks:[1,1,1,0],live:{phase:'setup',joined:0,q:1,t:12,ans:[0,0,0,0],show:false},sort:{learners:'name'},heatView:'theorem',exSel:0,edSt:'Draft'}}
+let S=freshState();
+
+/* learners (teacher data) */
+let seed=5;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+const NAMES=['Aisha','Ben','Carlos','Dineo','Elan','Fatima','Grace','Hamza'];
+const LEARNERS=NAMES.map((n,i)=>{const st=[0,1,2,3].map(k=>{let v=Math.round(55+rnd()*40);if(k===2)v=Math.max(15,v-38);if(k===3)v=Math.max(15,v-22);if(i===4)v=Math.max(10,v-30);return v});
+  const th=[0,1,2,3,4].map(k=>{let v=Math.round(25+rnd()*70);if(k>=2)v=Math.max(10,v-18);if(i===4)v=Math.max(8,v-35);return v});
+  return{id:i+1,name:n,st,th,done:6+Math.round(rnd()*10),last:['Today','Today','Yesterday','Today','3 days ago','Today','2 days ago','Yesterday'][i],help:i===1||i===4}});
+const STG=['Abstraction','Decomposition','Patterns','Solve'];
+const hue=v=>`hsl(${Math.round(v*1.2)} 62% 66%)`;
+
+/* ---------------- diagrams ---------------- */
+const keys=ks=>{const s=$('#msvg');if(s)s.setAttribute('class','dia '+ks.map(k=>'on-'+k).join(' '))};
+const hlCss=['centre','radii','ca','cb','tri','angC','angO','angA','angB','angT','angP','tan','radius'].map(k=>`.dia.on-${k} .k-${k}`).join(',');
+(function(){const st=document.createElement('style');st.textContent=hlCss+'{opacity:1}';document.head.appendChild(st)})();
+
+const ex1svg=()=>`<svg class="dia" id="msvg" viewBox="0 0 320 250" role="img" aria-label="Circle with centre O. Points A and B on the circle and C at the top. Lines OA, OB, CA, CB and AB are drawn.">
+<circle class="c" cx="160" cy="140" r="100"/>
+<path class="hlf k-tri" d="M160 140 L102.6 221.9 L217.4 221.9 Z"/>
+<path class="hlf k-angC" d="M160 40 L147.96 78.16 A40 40 0 0 0 172.04 78.16 Z"/>
+<path class="hlf k-angO" d="M160 140 L139.3 169.5 A36 36 0 0 0 180.7 169.5 Z"/>
+<path class="hlf k-angA" d="M102.6 221.9 L122.1 194.1 A34 34 0 0 1 136.6 221.9 Z"/>
+<path class="hlf k-angB" d="M217.4 221.9 L197.9 194.1 A34 34 0 0 0 183.4 221.9 Z"/>
+<line class="hl k-radii" x1="160" y1="140" x2="102.6" y2="221.9"/><line class="hl k-radii" x1="160" y1="140" x2="217.4" y2="221.9"/>
+<line class="hl k-ca" x1="160" y1="40" x2="102.6" y2="221.9"/><line class="hl k-cb" x1="160" y1="40" x2="217.4" y2="221.9"/>
+<circle class="hl k-centre" cx="160" cy="140" r="12"/>
+<path class="ln" d="M160 40 L102.6 221.9 M160 40 L217.4 221.9 M160 140 L102.6 221.9 M160 140 L217.4 221.9 M102.6 221.9 L217.4 221.9"/>
+<circle cx="160" cy="140" r="3.5" fill="var(--ink)"/>
+<text class="lbl" x="166" y="134">O</text><text class="lbl" x="154" y="30">C</text><text class="lbl" x="80" y="238">A</text><text class="lbl" x="224" y="238">B</text>
+<text class="lbl" x="171" y="96" style="font-size:12px">35°</text></svg>`;
+const ex2svg=()=>`<svg class="dia" id="msvg" viewBox="0 0 320 250" role="img" aria-label="Circle with centre O. T is on the circle at the bottom. A tangent line touches the circle at T. P is on the tangent. Lines OT and OP are drawn.">
+<circle class="c" cx="160" cy="140" r="90"/>
+<path class="hlf k-tri" d="M160 140 L160 230 L267.3 230 Z"/>
+<path class="hlf k-angO" d="M160 140 L160 174 A34 34 0 0 0 186 161.9 Z"/>
+<path class="hlf k-angT" d="M160 230 L160 212 L178 212 L178 230 Z"/>
+<path class="hlf k-angP" d="M267.3 230 L231.3 230 A36 36 0 0 1 239.7 206.9 Z"/>
+<line class="hl k-radius" x1="160" y1="140" x2="160" y2="230"/>
+<line class="hl k-tan" x1="40" y1="230" x2="300" y2="230"/>
+<circle class="hl k-centre" cx="160" cy="140" r="12"/>
+<path class="ln" d="M40 230 L300 230 M160 140 L160 230 M160 140 L267.3 230"/>
+<circle cx="160" cy="140" r="3.5" fill="var(--ink)"/>
+<text class="lbl" x="168" y="134">O</text><text class="lbl" x="146" y="248">T</text><text class="lbl" x="272" y="248">P</text><text class="lbl" x="190" y="180" style="font-size:12px">50°</text></svg>`;
+const mini=(inner,vb='0 0 320 270')=>`<svg class="mini" viewBox="${vb}" aria-hidden="true">${inner}</svg>`;
+const C1='<circle class="c" cx="160" cy="140" r="100"/>',C2='<circle class="c" cx="160" cy="140" r="90"/>';
+
+const EX={
+1:{id:1,title:'Find ∠OAB',topic:'Circle geometry',level:'Medium',svg:ex1svg,
+ rider:'O is the centre of the circle. ∠ACB = 35°. Prove that ∠OAB = 55°.',
+ theorems:['Angle at the centre','Isosceles triangle'],
+ facts:[{k:'centre',t:'O is the centre',need:1},{k:'angC',t:'∠ACB = 35°',need:1},{k:'angA',t:'Find ∠OAB',need:1},{k:'ca',t:'Length of CA',need:0},{k:'cb',t:'Length of CB',need:0}],
+ subs:[{t:'Angles at O and C on chord AB',need:1,hl:['angC','angO'],inner:mini(C1+'<path class="ln" d="M160 40 L102.6 221.9 M160 40 L217.4 221.9 M160 140 L102.6 221.9 M160 140 L217.4 221.9"/>')},
+       {t:'Triangle OAB',need:1,hl:['tri','radii'],inner:mini('<path class="ln" d="M160 140 L102.6 221.9 L217.4 221.9 Z"/>')},
+       {t:'Triangle ABC',need:0,hl:['ca','cb'],inner:mini(C1+'<path class="ln" d="M160 40 L102.6 221.9 L217.4 221.9 Z"/>')}],
+ pats:{opts:['Choose a theorem…','Angle at the centre = 2 × angle at the circumference','Radii are equal, so the triangle is isosceles','Angles in the same segment are equal'],ans:[1,2]},
+ guide:[[['centre','angC','angA'],'Look at the centre O, the 35° angle at C, and the angle at A that you must find.'],[['angC','angO','tri'],'One part holds the angles at O and C. The other is the triangle with corners O, A and B.'],[['angC','angO'],'Compare the angle at O with the angle at C. Then look at the sides of triangle OAB.']],
+ proof:[{s:'∠AOB = 70°',r:'∠ at centre = 2 × ∠ at circumference',hl:['angO','angC'],pre:1},{s:'OA = OB',r:'Radii of the same circle',hl:['radii'],pre:1},
+  {S:['∠OAB = ∠ACB','∠OAB = ∠OBA','∠OAB = 90°'],Sc:1,R:['Angles opposite equal sides','Angles in the same segment','Tangent is perpendicular to radius'],Rc:0,hl:['angA','angB'],hint:'Look at triangle OAB. Which two sides did you prove equal in step 2?'},
+  {S:['∠OAB = 110°','∠OAB = 35°','∠OAB = 55°'],Sc:2,R:['Exterior angle of a triangle','Sum of angles in a triangle = 180°','Co-interior angles'],Rc:1,hl:['angA','angB','angO'],hint:'The three angles of triangle OAB add to 180°. You know ∠AOB, and the other two are equal.'}]},
+2:{id:2,title:'Tangent and radius',topic:'Circle geometry',level:'Easy',svg:ex2svg,
+ rider:'PT is a tangent to the circle at T. O is the centre and ∠TOP = 50°. Prove that ∠OPT = 40°.',
+ theorems:['Tangent ⟂ radius','Angles in a triangle'],
+ facts:[{k:'tan',t:'PT is a tangent at T',need:1},{k:'angO',t:'∠TOP = 50°',need:1},{k:'angP',t:'Find ∠OPT',need:1},{k:'radius',t:'Length of OT',need:0},{k:'centre',t:'Position of the centre only',need:0}],
+ subs:[{t:'Radius OT and tangent PT',need:1,hl:['radius','tan','angT'],inner:mini(C2+'<path class="ln" d="M40 230 L300 230 M160 140 L160 230"/>')},
+       {t:'Triangle OTP',need:1,hl:['tri'],inner:mini('<path class="ln" d="M160 140 L160 230 L267.3 230 Z"/>')},
+       {t:'A chord from T',need:0,hl:['centre'],inner:mini(C2+'<path class="ln" d="M160 230 L82 185"/>')}],
+ pats:{opts:['Choose a theorem…','Tangent is perpendicular to the radius','Angles in a triangle add up to 180°','Angle at the centre = 2 × angle at the circumference'],ans:[1,2]},
+ guide:[[['tan','angO','angP'],'Look at the tangent PT, the 50° angle at O, and the angle at P that you must find.'],[['radius','tan','tri'],'One part is the radius meeting the tangent. The other is triangle OTP.'],[['radius','tan'],'Where a tangent touches the circle, what is special about the radius there? Then look at the three angles of the triangle.']],
+ proof:[{s:'∠OTP = 90°',r:'Tangent is perpendicular to radius',hl:['angT','tan','radius'],pre:1},
+  {S:['∠OTP = ∠OPT','∠OTP + ∠TOP + ∠OPT = 180°','∠TOP = ∠OPT'],Sc:1,R:['Angles opposite equal sides','Tangent is perpendicular to radius','Sum of angles in a triangle'],Rc:2,hl:['tri'],hint:'Triangle OTP has three angles. What do they add up to?'},
+  {S:['∠OPT = 50°','∠OPT = 90°','∠OPT = 40°'],Sc:2,R:['Alternate segment theorem','Radii are equal','180° − 90° − 50°'],Rc:2,hl:['angP'],hint:'Subtract the two angles you know from 180°.'}]}};
+
+/* list of examples shown */
+const EXLIST=[{id:1,t:'Find ∠OAB',topic:'Circle geometry',level:'Medium'},{id:2,t:'Tangent and radius',topic:'Circle geometry',level:'Easy'},
+ {id:0,t:'Cyclic quadrilateral',topic:'Circle geometry',level:'Hard'},{id:0,t:'Same segment',topic:'Circle geometry',level:'Medium'},{id:0,t:'Alternate segment',topic:'Circle geometry',level:'Hard'},
+ {id:0,t:'Isosceles triangle',topic:'Triangles',level:'Easy'},{id:0,t:'Angles in a triangle',topic:'Triangles',level:'Easy'},{id:0,t:'Similar triangles',topic:'Similarity',level:'Medium'},{id:0,t:'Midpoint theorem',topic:'Similarity',level:'Hard'}];
+const thumb=i=>`<svg class="mini" viewBox="0 0 120 80" aria-hidden="true"><circle class="c" cx="60" cy="40" r="30"/><path class="ln" d="M60 10 L${30+i%3*4} ${48-i%2*6} L${90-i%3*3} ${52+i%2*4} Z"/></svg>`;
+
+/* theorems */
+const THMS=[{id:1,n:'Angle at the centre',topic:'Circle geometry',s:'The angle at the centre of a circle is twice the angle at the circumference, when both stand on the same arc.'},
+ {id:2,n:'Tangent ⟂ radius',topic:'Circle geometry',s:'A tangent to a circle is perpendicular to the radius drawn to the point where it touches the circle.'},
+ {id:3,n:'Angles in the same segment',topic:'Circle geometry',s:'Angles in the same segment of a circle, standing on the same chord, are equal.'},
+ {id:4,n:'Cyclic quadrilateral',topic:'Circle geometry',s:'The opposite angles of a cyclic quadrilateral add up to 180°.'},
+ {id:5,n:'Alternate segment',topic:'Circle geometry',s:'The angle between a tangent and a chord equals the angle in the alternate segment.'},
+ {id:6,n:'Isosceles triangle',topic:'Triangles',s:'The angles opposite equal sides of a triangle are equal.'},
+ {id:7,n:'Angles in a triangle',topic:'Triangles',s:'The three angles of a triangle add up to 180°.'}];
+
+const CB='<circle class="c" cx="60" cy="40" r="30"/>';
+const DEFS=[['Radius','A line from the centre to any point on the circle.',CB+'<path class="em" d="M60 40 L90 40"/>',['Tangent ⟂ radius','Angle at the centre']],
+ ['Diameter','A chord that passes through the centre. It is twice the radius.',CB+'<path class="em" d="M30 40 L90 40"/>',['Angle at the centre']],
+ ['Chord','A straight line joining two points on the circle.',CB+'<path class="em" d="M31.8 50.3 L83 20.7"/>',['Angles in the same segment']],
+ ['Tangent','A line that touches the circle at exactly one point.',CB+'<path class="em" d="M90 8 V72"/>',['Tangent ⟂ radius','Alternate segment']],
+ ['Arc','A part of the circumference between two points.',CB+'<path class="em" d="M88.2 29.7 A30 30 0 0 0 54.8 10.5"/>',['Angle at the centre']],
+ ['Segment','The region between a chord and the arc it cuts off.',CB+'<path class="emf" d="M31.8 29.7 A30 30 0 0 1 88.2 29.7 Z"/>',['Angles in the same segment']],
+ ['Cyclic quadrilateral','A four-sided shape with all four corners on a circle.',CB+'<path class="em" d="M54.8 10.5 L31.8 50.3 L75 66 L88.2 29.7 Z"/>',['Cyclic quadrilateral']],
+ ['Subtend','A chord subtends an angle at a point when lines from the point to the chord ends form that angle.',CB+'<path class="ln" d="M60 10 L31.8 50.3 M60 10 L88.2 50.3"/><path class="em" d="M31.8 50.3 L88.2 50.3"/>',['Angle at the centre','Angles in the same segment']]];
+
+/* ---------------- theorem geometry ---------------- */
+const pt=(phi,r)=>[160+r*Math.cos(phi*Math.PI/180),140-r*Math.sin(phi*Math.PI/180)];
+function wedge(P,Q1,Q2,rad){const n=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;return[dx/l,dy/l]};
+  const u1=n(P,Q1),u2=n(P,Q2),p1=[P[0]+rad*u1[0],P[1]+rad*u1[1]],p2=[P[0]+rad*u2[0],P[1]+rad*u2[1]];
+  const sw=(u1[0]*u2[1]-u1[1]*u2[0])>0?1:0,m=[u1[0]+u2[0],u1[1]+u2[1]],ml=Math.hypot(m[0],m[1])||1;
+  return{d:`M${P[0]} ${P[1]} L${p1[0]} ${p1[1]} A${rad} ${rad} 0 0 ${sw} ${p2[0]} ${p2[1]} Z`,lab:[P[0]+(rad+16)*m[0]/ml,P[1]+(rad+16)*m[1]/ml],ang:Math.acos(Math.max(-1,Math.min(1,u1[0]*u2[0]+u1[1]*u2[1])))*180/Math.PI}}
+function thm1(r,th,cv,showA,showR){const O=[160,140],A=pt(270-th/2,r),B=pt(270+th/2,r),half=180-th/2-14,C=pt(90+(cv/100)*half,r);
+  const wO=wedge(O,A,B,28),wC=wedge(C,A,B,24);
+  let s=`<circle class="c" cx="160" cy="140" r="${r}"/>`;
+  if(showA)s+=`<path class="ang" d="${wO.d}"/><path class="ang" d="${wC.d}"/><text class="lbl" style="font-size:12px" x="${wO.lab[0]-12}" y="${wO.lab[1]+4}">${Math.round(wO.ang)}°</text><text class="lbl" style="font-size:12px" x="${wC.lab[0]-12}" y="${wC.lab[1]+4}">${Math.round(wC.ang)}°</text>`;
+  s+=`<path class="ln" d="M${A[0]} ${A[1]} L${B[0]} ${B[1]} M${C[0]} ${C[1]} L${A[0]} ${A[1]} M${C[0]} ${C[1]} L${B[0]} ${B[1]}${showR?` M160 140 L${A[0]} ${A[1]} M160 140 L${B[0]} ${B[1]}`:''}"/><circle cx="160" cy="140" r="3.5" fill="var(--ink)"/><text class="lbl" x="168" y="132">O</text>`;
+  const lab=(P,t,dx,dy)=>`<circle cx="${P[0]}" cy="${P[1]}" r="3.5" fill="var(--ink)"/><text class="lbl" x="${P[0]+dx}" y="${P[1]+dy}">${t}</text>`;
+  s+=lab(A,'A',-20,16)+lab(B,'B',8,16)+lab(C,'C',-4,-10);
+  return{svg:s,read:`∠AOB = <b>${Math.round(wO.ang)}°</b> &nbsp; ∠ACB = <b>${wC.ang.toFixed(1)}°</b><br>∠AOB ÷ ∠ACB = <b>${(wO.ang/wC.ang).toFixed(2)}</b>`}}
+function thm2(r,pos,d,showR){const O=[160,140],T=pt(pos,r),u=[(T[0]-O[0])/r,(T[1]-O[1])/r],tv=[-u[1],u[0]],P=[T[0]+tv[0]*d,T[1]+tv[1]*d],E1=[T[0]-tv[0]*120,T[1]-tv[1]*120],E2=[T[0]+tv[0]*120,T[1]+tv[1]*120];
+  const w=wedge(T,O,P,18),ang=w.ang;
+  let s=`<circle class="c" cx="160" cy="140" r="${r}"/><path class="ln" d="M${E1[0]} ${E1[1]} L${E2[0]} ${E2[1]} M160 140 L${T[0]} ${T[1]} M160 140 L${P[0]} ${P[1]}"/>`;
+  if(showR){const a=[T[0]+u[0]*-14*-1*-1,T[1]];const q1=[T[0]-u[0]*14,T[1]-u[1]*14],q2=[T[0]+tv[0]*14,T[1]+tv[1]*14],q3=[q1[0]+tv[0]*14,q1[1]+tv[1]*14];
+    s+=`<path class="ang" d="M${T[0]} ${T[1]} L${q1[0]} ${q1[1]} L${q3[0]} ${q3[1]} L${q2[0]} ${q2[1]} Z"/>`}
+  s+=`<circle cx="160" cy="140" r="3.5" fill="var(--ink)"/><text class="lbl" x="166" y="130">O</text><circle cx="${T[0]}" cy="${T[1]}" r="3.5" fill="var(--ink)"/><text class="lbl" x="${T[0]+u[0]*14-4}" y="${T[1]+u[1]*16+4}">T</text><circle cx="${P[0]}" cy="${P[1]}" r="3.5" fill="var(--ink)"/><text class="lbl" x="${P[0]+tv[0]*10-4}" y="${P[1]+tv[1]*12+4}">P</text>`;
+  return{svg:s,read:`Radius OT meets tangent PT at <b>${ang.toFixed(1)}°</b>.<br>It stays 90° wherever T is.`}}
+
+/* ---------------- shell ---------------- */
+const NAV={guest:[['Examples','/examples'],['Definitions','/definitions'],['Theorems','/theorems'],['Approach','/approach']],
+ learner:[['Home','/'],['Examples','/examples'],['Definitions','/definitions'],['Theorems','/theorems'],['Approach','/approach'],['Progress','/progress']],
+ teacher:[['Classes','/classes'],['Library','/library'],['Reports','/reports']],
+ author:[['Examples','/author/examples'],['Theorems','/author/theorems'],['Definitions','/author/definitions']]};
+const HOME={guest:'/',learner:'/',teacher:'/classes',author:'/author/examples'};
+function path(){const h=location.hash.slice(1)||'/';const[p,q]=h.split('?');return{p,q:new URLSearchParams(q||''),seg:p.split('/').filter(Boolean)}}
+function go(p){location.hash=p}
+function renderNav(){
+  const {p}=path();const items=NAV[S.role];
+  const act=items.filter(([n,h])=>h==='/'?p==='/':p===h||p.startsWith(h+'/')).sort((a,b)=>b[1].length-a[1].length)[0];
+  const acct=S.role==='guest'?`<a class="btn sm" href="#/login">Sign in</a>`:
+   `${S.role==='learner'?`<a class="btn sm ghost" href="#/settings">Settings</a>`:''}<button class="btn sm ghost" id="signout">Sign out</button>`;
+  $('#nav').innerHTML=`<div class="navin"><a class="logo" href="#${HOME[S.role]}">&#9651; EucliGeo</a><nav class="links" aria-label="Main">${items.map(([n,h])=>`<a href="#${h}" ${act&&act[1]===h?'aria-current="page"':''}>${n}</a>`).join('')}</nav><div class="acct">${acct}</div></div>`;
+  const so=$('#signout');if(so)so.onclick=()=>{S.role='guest';syncRole();go('/');toast('Signed out')};
+}
+function syncRole(){$$('#proto [data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===S.role))}
+$$('#proto [data-role]').forEach(b=>b.addEventListener('click',()=>{S.role=b.dataset.role;syncRole();const h=HOME[S.role];if(location.hash==='#'+h||(!location.hash&&h==='/'))render();else go(h)}));
+$('#reset').onclick=()=>{S=freshState();sv=null;syncRole();$('#overlay').innerHTML='';if(location.hash==='#/'||!location.hash)render();else go('/');toast('Prototype reset')};
+
+function showOverlay(html,drawer){$('#overlay').innerHTML=`<div class="scrim" id="scrim"></div>${html}`;$('#scrim').onclick=closeOv;const c=$('#ovclose');if(c)c.onclick=closeOv}
+function closeOv(){$('#overlay').innerHTML=''}
+const need=(role)=>{if(S.role==='guest'){toast('Sign in to use this page');go('/login');return false}return true};
+
+/* ---------------- router ---------------- */
+let sv=null;
+function render(){
+  clearTimers();closeOv();renderNav();window.scrollTo(0,0);
+  const {p,seg,q}=path();const v=$('#view');let r;
+  try{
+  if(seg[0]==='login')r=pLogin();
+  else if(seg[0]==='join')r=pJoin();
+  else if(seg[0]==='examples'&&seg[1]&&seg[2]==='result')r=pResult(+seg[1]);
+  else if(seg[0]==='examples'&&seg[1])r=pSolver(+seg[1]);
+  else if(seg[0]==='examples')r=pExamples();
+  else if(seg[0]==='definitions')r=pDefs();
+  else if(seg[0]==='theorems'&&seg[1])r=pTheorem(+seg[1]);
+  else if(seg[0]==='theorems')r=pTheorems();
+  else if(seg[0]==='approach')r=pApproach();
+  else if(seg[0]==='progress'){if(!need())return;r=pProgress(q.get('tab')||'theorem')}
+  else if(seg[0]==='settings'){if(!need())return;r=pSettings()}
+  else if(seg[0]==='library')r=pLibrary(q.get('tab')||'examples');
+  else if(seg[0]==='reports')r=pReports();
+  else if(seg[0]==='classes'&&seg[1]&&seg[2]==='learners'&&seg[3])r=pLearner(+seg[1],+seg[3]);
+  else if(seg[0]==='classes'&&seg[1])r=pClass(+seg[1],seg[2]||'heatmap');
+  else if(seg[0]==='classes')r=pClasses();
+  else if(seg[0]==='author')r=pAuthor(seg);
+  else r=S.role==='learner'?pHome():(S.role==='teacher'?pClasses():(S.role==='author'?pAuthor(['author','examples']):pLanding()));
+  }catch(err){console.error(err);r={html:'<div class="empty"><h3>Something went wrong</h3><p>This page could not be drawn.</p><a class="btn" href="#/">Go home</a></div>'}}
+  v.innerHTML=r.html;if(r.init)r.init();
+}
+window.addEventListener('hashchange',render);
+
+/* ---------------- guest pages ---------------- */
+function pLanding(){return{html:`<section class="hero"><div><h1>Learn geometry by thinking it through</h1><p class="muted" style="font-size:1.05rem;margin:12px 0 18px">EucliGeo guides South African high school learners through Euclidean geometry in four steps: abstraction, decomposition, pattern recognition and solving.</p><div class="actions"><a class="btn" href="#/examples/1">Try an example</a><a class="btn ghost" href="#/join">Join with class code</a></div></div><div class="card">${EX[1].svg()}</div></section>
+<div class="grid4">${STG.map((t,i)=>`<div class="card"><h3>${i+1}. ${t}</h3><p class="muted" style="margin:0">${['Pick what matters and ignore the rest.','Split the diagram into easier parts.','Match each part to a theorem.','Write each step with its reason.'][i]}</p></div>`).join('')}</div>
+<div class="grid3" style="margin-top:14px">${[['Interactive theorems','Drag sliders and watch the angles change.'],['Step-by-step guidance','Guides point to the sides and angles that matter.'],['Track your progress','See which thinking stage needs practice.']].map(x=>`<div class="card"><h3>${x[0]}</h3><p class="muted" style="margin:0">${x[1]}</p></div>`).join('')}</div>`}}
+function pLogin(){return{html:`<div style="max-width:380px;margin:20px auto" class="card"><h2>Sign in</h2><label class="f">Email<input type="email" id="em" placeholder="you@school.co.za"></label><label class="f">Password<input type="password" id="pw"></label><div class="actions"><button class="btn" id="si">Sign in</button></div><p class="muted" style="margin-top:10px"><a href="#/login" id="fp">Forgot password?</a></p><hr style="border:0;border-top:1.5px dashed var(--line);margin:14px 0"><a class="btn ghost" href="#/join">Join with a class code</a><p class="muted" style="margin-top:12px">Prototype shortcut: sign in as <a href="#/login" data-as="teacher">a teacher</a> or <a href="#/login" data-as="author">an author</a>.</p></div>`,
+ init(){$('#si').onclick=()=>{S.role='learner';syncRole();go('/');toast('Welcome back, '+S.name)};$('#fp').onclick=e=>{e.preventDefault();toast('A reset link would be sent to your email')};
+  $$('[data-as]').forEach(a=>a.onclick=e=>{e.preventDefault();S.role=a.dataset.as;syncRole();go(HOME[S.role])})}}}
+function pJoin(){let role='learner';return{html:`<div style="max-width:420px;margin:20px auto" class="card"><h2>Create account</h2><div class="chips" id="rl"><span class="muted" style="align-self:center">I am a:</span><button class="chip round" aria-pressed="true" data-r="learner">Learner</button><button class="chip round" aria-pressed="false" data-r="teacher">Teacher</button></div><label class="f">Name<input type="text" id="nm"></label><label class="f">Email<input type="email"></label><label class="f">Password<input type="password"></label><label class="f" id="cc">Class code (optional)<input type="text" id="code" placeholder="e.g. AB12CD"></label><label class="muted" style="display:flex;gap:8px;margin:6px 0 12px"><input type="checkbox" id="ag"> I agree to the privacy notice</label><button class="btn" id="mk">Create account</button></div>`,
+ init(){$$('#rl .chip').forEach(b=>b.onclick=()=>{role=b.dataset.r;$$('#rl .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#cc').style.display=role==='learner'?'grid':'none'});
+  $('#mk').onclick=()=>{if(!$('#ag').checked)return toast('Please agree to the privacy notice first');S.role=role;if($('#nm').value)S.name=$('#nm').value;syncRole();go(HOME[role]);toast('Account created')}}}}
+
+/* ---------------- learner pages ---------------- */
+function pHome(){const nxt=!S.done[2]?2:!S.done[1]?1:0;const e=EX[nxt]||EX[1];
+  return{html:`<h2>Hello, ${S.name}</h2><div class="grid2" style="grid-template-columns:1.3fr 1fr;margin-top:12px"><div class="card hi"><h3>Next up for you</h3><p class="muted">Chosen because "${e.theorems[0]}" is due for review.</p><div style="max-width:200px">${thumb(e.id)}</div><p style="margin:8px 0"><b>${e.title}</b> <span class="pill">${e.level}</span></p><a class="btn" href="#/examples/${e.id}">Start example</a></div>
+  <div class="card"><h3>Assigned by your teacher</h3>${S.assigned.map(a=>`<div class="row"><span>${a.t}</span>${a.ex?`<a class="btn sm" href="#/examples/${a.ex}">Open</a>`:`<span class="pill warn">Due ${a.due}</span>`}</div>`).join('')||'<p class="muted">Nothing assigned.</p>'}</div></div>
+  <div class="grid2" style="margin-top:14px"><div class="card"><h3>Mastery by thinking stage</h3>${STG.map((t,i)=>`<div class="row"><span style="min-width:120px">${t}</span><div class="meter"><i style="width:${S.stageM[i]}%"></i></div><b>${S.stageM[i]}%</b></div>`).join('')}<p class="muted" style="margin:8px 0 0">Weakest: ${STG[S.stageM.indexOf(Math.min(...S.stageM))]}.</p></div>
+  <div class="card"><h3>Recent attempts</h3>${S.history.slice(0,4).map(h=>`<div class="row"><span>${h.t}</span><span class="muted">${h.date} · ${h.st.map(x=>x?'✓':'✗').join(' ')}</span></div>`).join('')}<div class="actions"><a class="btn sm ghost" href="#/progress?tab=history">See all</a></div></div></div>`}}
+
+function pExamples(inLib){const f=S.f;
+  return{html:`<h2>Examples</h2><p class="muted">Pick one. You solve it in four stages.</p>
+  <div class="chips" id="ft"><span class="muted" style="align-self:center">Topic</span>${['All','Circle geometry','Triangles','Similarity'].map(t=>`<button class="chip round" aria-pressed="${f.topic===t}" data-k="topic" data-v="${t}">${t}</button>`).join('')}</div>
+  <div class="chips" id="fl"><span class="muted" style="align-self:center">Difficulty</span>${['All','Easy','Medium','Hard'].map(t=>`<button class="chip round" aria-pressed="${f.level===t}" data-k="level" data-v="${t}">${t}</button>`).join('')}<button class="chip round" aria-pressed="${f.undone}" id="und">Not done yet</button></div>
+  <div class="grid3" id="exg"></div>`,
+  init(){const draw=()=>{const l=EXLIST.filter(e=>(f.topic==='All'||e.topic===f.topic)&&(f.level==='All'||e.level===f.level)&&(!f.undone||!S.done[e.id]));
+    $('#exg').innerHTML=l.map((e,i)=>`<a class="card click" href="${e.id?'#/examples/'+e.id:'#/examples'}" data-pl="${e.id}">${thumb(i)}<h3 style="margin-top:8px">${e.t}</h3><span class="pill">${e.topic}</span><span class="pill">${e.level}</span>${S.done[e.id]?'<span class="pill ok">Done</span>':e.id?'':'<span class="pill">Not in prototype</span>'}</a>`).join('')||'<div class="empty" style="grid-column:1/-1"><p>No examples match these filters.</p><button class="btn ghost" id="clr">Clear filters</button></div>';
+    $$('#exg [data-pl="0"]').forEach(a=>a.onclick=e=>{e.preventDefault();toast('This example is not built in the prototype. Try the first two.')});const c=$('#clr');if(c)c.onclick=()=>{S.f={topic:'All',level:'All',undone:false};render()}};
+   $$('#ft .chip,#fl .chip[data-k]').forEach(b=>b.onclick=()=>{f[b.dataset.k]=b.dataset.v;render()});$('#und').onclick=()=>{f.undone=!f.undone;render()};draw()}}}
+
+/* ---- solver ---- */
+const TASKS=[['Pick what you need','Tap only the facts you need. Ignore the rest. This keeps you from being distracted by parts of the diagram that do not help.'],['Split the diagram','Choose the smaller diagrams that help you reach the answer. Each one should be easier to solve on its own.'],['Match each part to a theorem','Look at the shape of each part. Which rule does it follow?'],['Write the proof','For each step, choose the statement and the reason. Steps you have already established are filled in for you.']];
+function startEx(id){const x=EX[id];sv={x,stage:0,done:[0,0,0,0],wrong:[0,0,0,0],used:0,sel:{},step:x.proof.findIndex(p=>!p.pre),fin:false}}
+function pSolver(id){if(!EX[id]){toast('That example is not in the prototype');return{html:'<div class="empty"><a class="btn" href="#/examples">Back to examples</a></div>'}}
+  if(!sv||sv.x.id!==id)startEx(id);
+  return{html:`<div class="actions" style="margin:0 0 6px"><a class="btn sm ghost" href="#/examples">Back to examples</a><button class="btn sm ghost" id="restart">Start again</button></div><h2>${sv.x.title}</h2><p>${sv.x.rider}</p><div class="stages" id="stages"></div><div class="two"><div id="left"></div><div id="right"></div></div>`,init:()=>{$('#restart').onclick=()=>{startEx(id);renderSolver()};renderSolver()}}}
+function renderSolver(){const x=sv.x,st=sv.stage;
+  $('#stages').innerHTML=STG.map((n,i)=>`<div class="stg ${sv.done[i]?'done':''} ${i===st?'cur':''}"><i>${sv.done[i]?'✓':i+1}</i>${n}</div>`).join('');
+  $('#left').innerHTML=x.svg()+'<p class="muted center">Not drawn to scale</p>';
+  const R=$('#right');let w='';
+  if(st===0)w=`<div class="chips" id="abs">${x.facts.map((f,i)=>`<button class="chip" aria-pressed="false" data-i="${i}">${f.t}</button>`).join('')}</div>`;
+  if(st===1)w=`<div class="subs" id="subs">${x.subs.map((s,i)=>`<button class="subc" aria-pressed="false" data-i="${i}">${s.inner}<small>${s.t}</small></button>`).join('')}</div>`;
+  if(st===2){const o=x.pats.opts.map((p,i)=>`<option value="${i}">${p}</option>`).join('');w=x.subs.filter(s=>s.need).map((s,i)=>`<div class="card" style="margin-bottom:8px;display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:center"><div>${s.inner}</div><label class="f" style="margin:0"><b>${s.t}</b><select class="pat" data-i="${i}" aria-label="Theorem for ${s.t}">${o}</select></label></div>`).join('')+`<p class="muted"><a href="#/theorems" id="optm">Open a theorem</a> to look it up without losing your place.</p>`}
+  if(st===3)w='<div id="solveBox"></div>';
+  R.innerHTML=`<div class="task">${TASKS[st][0]}</div><div class="why">${TASKS[st][1]}</div>${w}<p class="fb" id="fb" aria-live="polite"></p><div class="actions"><button class="btn" id="check">Check</button><button class="btn ghost" id="guide">Guide me</button><button class="btn ghost" id="hintB">Hint</button><button class="btn" id="next" disabled>${st===3?'See result':'Next stage'}</button></div><p class="muted" id="used" style="margin-top:6px">Guides and hints used: ${sv.used}</p>`;
+  keys([]);
+  if(st===0)$$('#abs .chip').forEach(c=>c.onclick=()=>{c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')!=='true');keys($$('#abs [aria-pressed=true]').map(b=>x.facts[b.dataset.i].k))});
+  if(st===1)$$('#subs .subc').forEach(c=>c.onclick=()=>{c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')!=='true');const k=[];$$('#subs [aria-pressed=true]').forEach(b=>k.push(...x.subs[b.dataset.i].hl));keys(k)});
+  if(st===2){const nd=x.subs.filter(s=>s.need);$$('.pat').forEach(s=>s.onchange=()=>keys(nd[+s.dataset.i].hl));$('#optm').onclick=e=>{e.preventDefault();openPanel()}}
+  if(st===3)renderSolve();
+  if(sv.done[st]&&st<3){$('#next').disabled=false}
+  $('#check').onclick=check;$('#guide').onclick=guide;$('#hintB').onclick=hint;$('#next').onclick=nextStage;
+}
+const fb=(m,ok)=>{const f=$('#fb');if(f){f.textContent=m;f.className='fb '+(ok===true?'good':ok===false?'bad':'')}};
+const usedUp=()=>{sv.used++;$('#used').textContent='Guides and hints used: '+sv.used};
+function renderSolve(){const x=sv.x,i=sv.step;let h='<div class="proof">';
+  x.proof.forEach((p,j)=>{if(j<i)h+=`<div class="step ok"><span class="n">✓</span><span>${p.s||sv.sel['s'+j]}</span><span><small>Reason</small>${p.r||sv.sel['r'+j]}</span></div>`;
+    else if(j===i)h+=`<div class="step active"><span class="n">${j+1}</span><span><small>Statement</small>Choose below</span><span><small>Reason</small>Choose below</span></div>`;
+    else h+=`<div class="step"><span class="n">${j+1}</span><span>&nbsp;</span><span>&nbsp;</span></div>`});
+  h+='</div>';
+  if(i<x.proof.length){const p=x.proof[i];h+=`<div class="picker"><h4>Statement for step ${i+1}</h4><div class="chips" id="cS">${p.S.map((t,k)=>`<button class="chip" aria-pressed="false" data-k="${k}">${t}</button>`).join('')}</div><h4>Reason</h4><div class="chips" id="cR">${p.R.map((t,k)=>`<button class="chip" aria-pressed="false" data-k="${k}">${t}</button>`).join('')}</div></div>`;
+    $('#solveBox').innerHTML=h;['#cS','#cR'].forEach(id=>{const b=$(id);b.dataset.v='';[...b.children].forEach(c=>c.onclick=()=>{[...b.children].forEach(y=>y.setAttribute('aria-pressed','false'));c.setAttribute('aria-pressed','true');b.dataset.v=c.dataset.k})});keys(p.hl)}
+  else{h+=`<div class="result"><b style="font-family:var(--display)">Proof complete.</b><p style="margin:6px 0 0">Press "See result" to review your stages and mastery.</p></div>`;$('#solveBox').innerHTML=h;keys(['angA']);sv.done[3]=1;sv.fin=true;$('#stages').innerHTML=STG.map((n,k)=>`<div class="stg ${sv.done[k]?'done':''}"><i>✓</i>${n}</div>`).join('');$('#next').disabled=false;$('#check').disabled=true}
+}
+function check(){const x=sv.x,st=sv.stage;let ok=false;
+  if(st===0){const on=$$('#abs [aria-pressed=true]').map(b=>+b.dataset.i);if(!on.length)return fb('Tap the facts you need first.',false);
+    if(x.facts.some((f,i)=>!f.need&&on.includes(i))){sv.wrong[0]++;return fb('Some of these do not help. You only need the givens and the target, not side lengths or positions.',false)}
+    if(x.facts.some((f,i)=>f.need&&!on.includes(i))){sv.wrong[0]++;return fb('Not everything yet. You need the givens and the angle you must find.',false)}
+    ok=true;fb('Correct. Two givens and one target: that is all this problem needs.',true)}
+  if(st===1){const on=$$('#subs [aria-pressed=true]').map(b=>+b.dataset.i);if(!on.length)return fb('Select the sub-diagrams that help.',false);
+    if(x.subs.some((s,i)=>!s.need&&on.includes(i))){sv.wrong[1]++;return fb('One of these parts cannot help you reach the answer. Remove it.',false)}
+    if(x.subs.some((s,i)=>s.need&&!on.includes(i))){sv.wrong[1]++;return fb('You need two parts: one that links the angles, and the triangle that holds the angle you must find.',false)}
+    ok=true;fb('Correct. Two smaller diagrams, each easier than the whole.',true)}
+  if(st===2){const sel=$$('.pat').map(s=>+s.value);if(sel.some(v=>!v))return fb('Choose a theorem for both parts.',false);
+    const bad=sel.findIndex((v,i)=>v!==x.pats.ans[i]);if(bad>=0){sv.wrong[2]++;return fb(bad===0?'Look at the first part again. Which theorem links these angles or lines?':'Look at the second part again. What do you know about its sides or angles?',false)}
+    ok=true;fb('Correct. Both patterns recognised.',true)}
+  if(st===3){const i=sv.step,cS=$('#cS'),cR=$('#cR');if(!cS||cS.dataset.v===''||cR.dataset.v==='')return fb('Choose a statement and a reason, then check.',false);const p=x.proof[i];
+    if(+cS.dataset.v!==p.Sc){sv.wrong[3]++;return fb('Check the statement again. Look at the highlighted part of the diagram.',false)}
+    if(+cR.dataset.v!==p.Rc){sv.wrong[3]++;return fb('The statement is right, but a different reason fits it.',false)}
+    sv.sel['s'+i]=p.S[p.Sc];sv.sel['r'+i]=p.R[p.Rc];sv.step++;renderSolve();return fb(sv.step>=x.proof.length?'All steps correct.':'Correct. On to the next step.',true)}
+  if(ok){sv.done[st]=1;$('#next').disabled=false;$('#stages').innerHTML=STG.map((n,k)=>`<div class="stg ${sv.done[k]?'done':''} ${k===st?'cur':''}"><i>${sv.done[k]?'✓':k+1}</i>${n}</div>`).join('')}}
+function guide(){usedUp();const x=sv.x,st=sv.stage;if(st<3){const g=x.guide[st];keys(g[0]);fb(g[1])}else{const p=x.proof[Math.min(sv.step,x.proof.length-1)];keys(p.hl);fb('Focus on the highlighted part of the diagram for this step.')}}
+function hint(){usedUp();const t=['Ask: what does the question give me, and what do I need to find?','Ask: which parts of the diagram share the same angle or the same sides?','Think about which theorem uses these shapes, and which uses equal sides or right angles.'];const st=sv.stage;fb(st<3?t[st]:(sv.x.proof[Math.min(sv.step,sv.x.proof.length-1)].hint||'Use your patterns.'))}
+function nextStage(){if(sv.stage<3){sv.stage++;renderSolver()}else finishEx()}
+function finishEx(){const x=sv.x;const r={ex:x.id,title:x.title,st:sv.wrong.map(w=>w?0:1),wrong:sv.wrong.slice(),used:sv.used,theorems:x.theorems};
+  if(!S.done[x.id]){S.done[x.id]=1;x.theorems.forEach((t,i)=>{S.mastery[t]=Math.min(99,(S.mastery[t]||50)+(i?2:4))});r.st.forEach((o,i)=>{if(o)S.stageM[i]=Math.min(99,S.stageM[i]+2)});
+    S.history.unshift({t:x.title,date:'Today',st:r.st,hints:sv.used,ex:x.id});S.assigned=S.assigned.filter(a=>a.ex!==x.id)}
+  S.last=r;go('/examples/'+x.id+'/result')}
+function openPanel(){const x=sv.x,t=THMS.find(h=>h.n===x.theorems[sv.stage===2?0:0])||THMS[0];let tab='t';
+  const draw=()=>{const th=t.id===2?thm2(90,270,107,true):thm1(100,70,0,true,true);
+    $('#panel').innerHTML=`<div class="actions" style="margin:0 0 10px"><button class="chip round" aria-pressed="${tab==='t'}" data-t="t">Theorem</button><button class="chip round" aria-pressed="${tab==='d'}" data-t="d">Definition</button><button class="btn sm ghost" id="ovclose" style="margin-left:auto">Close</button></div>${tab==='t'?`<h3>${t.n}</h3><p>${t.s}</p><svg class="dia" viewBox="0 0 320 270" id="psvg">${th.svg}</svg><div class="ctrl"><label><span>Move point</span><input type="range" id="psl" min="-100" max="100" value="0" aria-label="Move point"></label></div>`:`<h3>${DEFS[2][0]}</h3><p>${DEFS[2][1]}</p>${mini(DEFS[2][2],'0 0 120 80')}`}<div class="actions"><button class="btn" id="back2">Back to problem</button></div>`;
+    $$('#panel [data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;draw()});$('#ovclose').onclick=closeOv;$('#back2').onclick=closeOv;
+    const sl=$('#psl');if(sl)sl.oninput=()=>{const v=+sl.value;const o=t.id===2?thm2(90,270+v*.6,107,true):thm1(100,70,v,true,true);$('#psvg').innerHTML=o.svg}};
+  showOverlay('<aside class="drawer" id="panel" aria-label="Theorem panel"></aside>');draw()}
+
+function pResult(id){const r=S.last&&S.last.ex===id?S.last:null;if(!r)return{html:`<div class="empty"><p>No result yet for this example.</p><a class="btn" href="#/examples/${id}">Start example</a></div>`};
+  return{html:`<h2>Proof complete: ${r.title}</h2>${S.role==='guest'?`<div class="banner">Sign in to save your progress and see it on your Home page. <a href="#/login">Sign in</a></div>`:''}
+  <div class="grid2"><div class="card"><h3>Thinking stages</h3>${STG.map((t,i)=>`<div class="row"><span>${t}</span><span>${r.st[i]?'<b style="color:var(--good)">✓ first time</b>':'✓ after '+(r.wrong[i]+1)+' tries'}</span></div>`).join('')}<p class="muted" style="margin:8px 0 0">Guides and hints used: ${r.used}</p></div>
+  <div class="card"><h3>Mastery</h3>${r.theorems.map((t,i)=>`<div class="row"><span style="min-width:140px">${t}</span><div class="meter"><i style="width:${S.mastery[t]}%"></i></div><b>+${i?2:4}%</b></div>`).join('')}</div></div>
+  <details class="card" style="margin-top:14px"><summary><b>Worked solution</b></summary><div style="margin-top:8px">${EX[id].proof.map((p,i)=>`<div class="row"><span>${i+1}. ${p.s||p.S[p.Sc]}</span><span class="muted">${p.r||p.R[p.Rc]}</span></div>`).join('')}</div></details>
+  <div class="actions"><a class="btn" href="#/examples/${id===1?2:1}">Next example</a><a class="btn ghost" href="#/examples/${id}" id="again">Try again</a><a class="btn ghost" href="#/theorems/${THMS.find(t=>t.n===EX[id].theorems[0]).id}">Practise this theorem</a></div>`,
+  init(){$('#again').onclick=()=>{sv=null}}}}
+
+function pDefs(){const sel=S.defSel;return{html:`<h2>Definitions</h2><input type="search" id="dq" placeholder="Search a term, for example chord" aria-label="Search definitions" style="max-width:340px;margin:8px 0 14px"><div class="grid4" id="dg"></div><div id="dd"></div>`,
+ init(){const draw=q=>{$('#dg').innerHTML=DEFS.filter(d=>d[0].toLowerCase().includes(q.toLowerCase())).map(d=>`<button class="card click" data-t="${d[0]}" style="text-align:left;font:inherit;cursor:pointer" aria-label="${d[0]}"><svg class="mini" viewBox="0 0 120 80" aria-hidden="true">${d[2]}</svg><h3 style="margin-top:6px">${d[0]}</h3><p class="muted" style="margin:0">${d[1].split('.')[0]}.</p></button>`).join('')||'<div class="empty" style="grid-column:1/-1">No term matches. Try "chord" or "tangent".</div>';
+  $$('#dg [data-t]').forEach(b=>b.onclick=()=>{S.defSel=b.dataset.t;detail()})};
+  const detail=()=>{const d=DEFS.find(x=>x[0]===S.defSel);if(!d)return;$('#dd').innerHTML=`<div class="card hi" style="margin-top:14px"><h3>${d[0]}</h3><div style="max-width:200px">${mini(d[2],'0 0 120 80')}</div><p>${d[1]}</p><p class="muted">Related theorems:</p><div>${d[3].map(n=>{const t=THMS.find(h=>h.n===n);return t?`<a class="pill" href="#/theorems/${t.id}">${n}</a>`:''}).join('')}</div></div>`};
+  $('#dq').oninput=e=>draw(e.target.value);draw('');detail()}}}
+
+function pTheorems(){const groups=[...new Set(THMS.map(t=>t.topic))];
+  return{html:`<h2>Theorems</h2>${groups.map(g=>`<h3 style="margin:18px 0 8px;color:var(--blue)">${g}</h3><div class="grid3">${THMS.filter(t=>t.topic===g).map(t=>`<a class="card click" href="#/theorems/${t.id}"><h3>${t.n}</h3><p class="muted">${t.s.slice(0,74)}…</p>${S.role==='guest'?'':`<div class="row" style="border:0;padding:4px 0"><div class="meter"><i style="width:${S.mastery[t.n]}%"></i></div><span class="muted">${S.mastery[t.n]}%</span></div>`}<span class="btn sm" style="margin-top:6px">Explore</span></a>`).join('')}</div>`).join('')}`}}
+function pTheorem(id){const t=THMS.find(h=>h.id===id);if(!t)return{html:'<div class="empty"><a class="btn" href="#/theorems">Back</a></div>'};
+  const live=id===1||id===2;const ex=Object.values(EX).filter(e=>e.theorems.includes(t.n));
+  return{html:`<p><a href="#/theorems">&larr; All theorems</a></p><h2>${t.n}</h2><p>${t.s}</p>
+  ${live?`<div class="two" style="margin-top:12px"><div><svg class="dia" id="tsvg" viewBox="0 0 320 270" role="img" aria-label="Interactive diagram for ${t.n}"></svg><div id="ggbox"></div></div><div><div class="card"><h3>Controls</h3><div class="ctrl"><label><input type="checkbox" id="c1" checked> <span>${id===1?'Show angles':'Show right angle'}</span></label>${id===1?'<label><input type="checkbox" id="c2" checked> <span>Show radii OA and OB</span></label>':''}<label><span>Radius</span><input type="range" id="sR" min="60" max="${id===1?105:95}" value="${id===1?100:90}" aria-label="Radius"></label>${id===1?'<label><span>Size of ∠AOB</span><input type="range" id="sT" min="40" max="140" value="70" aria-label="Size of angle AOB"></label><label><span>Move point C</span><input type="range" id="sC" min="-100" max="100" value="0" aria-label="Move point C"></label>':'<label><span>Move point T</span><input type="range" id="sP" min="0" max="360" value="270" aria-label="Move point T"></label><label><span>Distance TP</span><input type="range" id="sD" min="40" max="115" value="107" aria-label="Distance TP"></label>'}</div><div class="readout" id="rd"></div></div>
+  <div class="actions"><a class="btn" href="#/examples/${ex[0]?ex[0].id:1}">Practise this theorem</a><button class="btn ghost" id="gg">Open in GeoGebra</button></div></div></div>`
+   :`<div class="card" style="margin-top:12px"><div class="empty"><p>The interactive diagram for this theorem is not built in the prototype. Try "Angle at the centre" or "Tangent ⟂ radius".</p></div></div>`}
+  <h3 style="margin-top:20px">Examples that use this theorem</h3><div class="grid3">${ex.map(e=>`<a class="card click" href="#/examples/${e.id}"><b>${e.title}</b><br><span class="pill">${e.level}</span></a>`).join('')||'<p class="muted">None yet.</p>'}</div>`,
+  init(){if(!live)return;const q=i=>document.getElementById(i);let raf=0;
+   const draw=()=>{const o=id===1?thm1(+q('sR').value,+q('sT').value,+q('sC').value,q('c1').checked,q('c2').checked):thm2(+q('sR').value,+q('sP').value,+q('sD').value,q('c1').checked);$('#tsvg').innerHTML=o.svg;$('#rd').innerHTML=o.read};
+   $$('.ctrl input').forEach(i=>i.addEventListener('input',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}));draw();
+   $('#gg').onclick=()=>{$('#ggbox').innerHTML='<div class="card" style="margin-top:10px"><h3>GeoGebra</h3><p class="muted">Loading GeoGebra…</p><div class="meter"><i style="width:40%"></i></div><p class="muted" style="margin-top:8px">In the real app the GeoGebra script downloads only now. If it fails you see a retry button.</p><button class="btn sm ghost" id="ggc">Close GeoGebra</button></div>';$('#ggc').onclick=()=>$('#ggbox').innerHTML=''}}}}
+
+function pApproach(){return{html:`<h2>Approach: how to solve a geometry problem</h2><p class="muted">Yellow steps are the four thinking stages used in every example.</p><div class="alg">${[['Abstraction: keep what matters','What am I given? What must I find? Which parts of the diagram do I ignore?',1],['Decomposition: split the diagram','Which smaller diagrams can I solve one at a time?',1],['Pattern recognition: match to a theorem','Have I seen this shape before? Which theorem fits each part?',1],['Solve: write statements and reasons','What follows from each fact I have? What is the reason for each statement?',1],['Reflect and check','Did I use every given? Does the answer make sense on the diagram? If not, go back to step 1.',0]].map(a=>`<div class="card ${a[2]?'ctc':''}"><h3>${a[0]}</h3><p class="muted" style="margin:0;font-style:italic">${a[1]}</p></div>`).join('')}</div><div class="actions"><a class="btn" href="#/examples/1">Try it on an example</a></div>`}}
+
+function pProgress(tab){const tabs=[['theorem','By theorem'],['stages','By thinking stage'],['history','History']];
+  const head=`<h2>My progress</h2><nav class="tabs">${tabs.map(([k,n])=>`<a href="#/progress?tab=${k}" ${k===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>`;let b='';
+  if(tab==='theorem')b=`<div class="grid3">${THMS.map(t=>{const m=S.mastery[t.n];const due=m<65;return`<a class="card click" href="#/theorems/${t.id}" style="background:color-mix(in srgb,var(--blue) ${Math.round(m*.3)}%,var(--card));${due?'border:2.5px dashed var(--mark)':''}"><b style="font-family:var(--display)">${t.n}</b><div style="font:700 1.5rem var(--display)">${m}%</div><span class="muted">${due?'Review due':'On track'}</span></a>`}).join('')}</div>`;
+  if(tab==='stages'){const w=S.stageM.indexOf(Math.min(...S.stageM));b=`<div class="grid2"><div class="card"><h3>Mastery by stage</h3>${STG.map((t,i)=>`<div class="row"><span style="min-width:120px">${t}</span><div class="meter"><i style="width:${S.stageM[i]}%"></i></div><b>${S.stageM[i]}%</b></div>`).join('')}</div><div class="card"><h3>Over the last 4 weeks</h3><svg viewBox="0 0 240 110" style="width:100%"><g stroke="var(--line)"><path d="M10 10 H230 M10 55 H230 M10 100 H230"/></g><path d="M10 90 L80 75 L150 60 L230 ${100-S.stageM[w]*.9}" stroke="var(--blue)" stroke-width="3" fill="none"/></svg><p class="muted">${STG[w]}</p></div></div><div class="card hi" style="margin-top:14px"><h3>Tip for ${STG[w]}</h3><p>Before you choose a theorem, say which sides or angles are marked the same. That usually points to the pattern.</p><a class="btn" href="#/examples">Practise this stage</a></div>`}
+  if(tab==='history')b=`<div class="card scroll"><table class="tbl"><thead><tr><th>Example</th><th>Date</th><th>Stages</th><th>Hints</th></tr></thead><tbody>${S.history.map((h,i)=>`<tr class="click" data-i="${i}"><td>${h.t}</td><td>${h.date}</td><td>${h.st.map(x=>x?'✓':'✗').join(' ')}</td><td>${h.hints}</td></tr>`).join('')}</tbody></table></div>`;
+  return{html:head+b,init(){$$('tr.click').forEach(r=>r.onclick=()=>{const h=S.history[+r.dataset.i];if(h.ex&&S.last&&S.last.ex===h.ex)go('/examples/'+h.ex+'/result');else toast('Result pages are kept for attempts made in this session')})}}}
+
+function pSettings(){return{html:`<h2>Settings</h2><div class="grid2"><div class="card"><h3>Profile</h3><label class="f">Name<input type="text" id="sn" value="${S.name}"></label><button class="btn sm" id="sv">Save</button></div>
+ <div class="card"><h3>My classes</h3><div id="cl">${S.joined.map(c=>`<div class="row"><span>${c.name}</span><button class="btn sm ghost" data-l="${c.code}">Leave</button></div>`).join('')||'<p class="muted">Not in a class.</p>'}</div><label class="f" style="margin-top:8px">Class code<input type="text" id="jc" placeholder="e.g. QW98ZX"></label><button class="btn sm" id="jb">Join</button></div></div>
+ <div class="grid2" style="margin-top:14px"><div class="card"><h3>Appearance</h3><div class="chips"><span class="muted" style="align-self:center">Theme</span>${['system','light','dark'].map(t=>`<button class="chip round" data-th="${t}" aria-pressed="${S.theme===t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div><div class="chips"><span class="muted" style="align-self:center">Text size</span>${[['Normal','17px'],['Large','20px']].map(([n,v])=>`<button class="chip round" data-fs="${v}" aria-pressed="${document.documentElement.style.getPropertyValue('--fs')===v||(!document.documentElement.style.getPropertyValue('--fs')&&v==='17px')}">${n}</button>`).join('')}</div></div>
+ <div class="card"><h3>My data</h3><p class="muted">You can download everything stored about you, or delete your account.</p><div class="actions"><button class="btn sm ghost" id="dl">Download my data</button><button class="btn sm danger" id="del">Delete my account</button></div></div></div>`,
+ init(){$('#sv').onclick=()=>{S.name=$('#sn').value||S.name;toast('Saved')};
+  $('#jb').onclick=()=>{const c=$('#jc').value.trim().toUpperCase();const cl=S.classes.find(k=>k.code===c);if(!cl)return toast('That code was not found. Try QW98ZX.');if(S.joined.some(j=>j.code===c))return toast('You are already in that class');S.joined.push({name:cl.name,code:c});toast('Joined '+cl.name);render()};
+  $$('[data-l]').forEach(b=>b.onclick=()=>{S.joined=S.joined.filter(j=>j.code!==b.dataset.l);toast('You left the class');render()});
+  $$('[data-th]').forEach(b=>b.onclick=()=>{S.theme=b.dataset.th;if(S.theme==='system')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',S.theme);$$('[data-th]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  $$('[data-fs]').forEach(b=>b.onclick=()=>{document.documentElement.style.setProperty('--fs',b.dataset.fs);$$('[data-fs]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  $('#dl').onclick=()=>toast('Preparing your data… (prototype: no file is created)');
+  $('#del').onclick=()=>{showOverlay(`<div class="modal"><h3>Delete your account?</h3><p class="muted">Your progress will be removed. Your class results are kept anonymously for your teacher.</p><div class="actions"><button class="btn ghost" id="ovclose">Cancel</button><button class="btn danger" id="dok">Delete</button></div></div>`);$('#dok').onclick=()=>{closeOv();S.role='guest';syncRole();go('/');toast('Account deleted (prototype)')}}}}}
+
+/* ---------------- teacher pages ---------------- */
+function pClasses(){return{html:`<div class="row" style="border:0"><h2>Classes</h2><button class="btn" id="nc">Create class</button></div><div class="grid2">${S.classes.map(c=>`<div class="card"><h3>${c.name}</h3><div class="row" style="border:0;padding:4px 0"><span class="pill">Code: ${c.code}</span><span class="muted">${c.n} learners</span></div><p class="muted">Weakest stage: ${c.weak}</p><div class="actions"><a class="btn" href="#/classes/${c.id}/heatmap">Open</a><button class="btn ghost" data-cp="${c.code}">Copy code</button></div></div>`).join('')}</div>`,
+ init(){$$('[data-cp]').forEach(b=>b.onclick=()=>toast('Code '+b.dataset.cp+' copied'));
+  $('#nc').onclick=()=>{const code=Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+   showOverlay(`<div class="modal"><div class="row" style="border:0"><h3>Create class</h3><button class="btn sm ghost" id="ovclose">×</button></div><label class="f">Class name<input type="text" id="cn" placeholder="e.g. Class 11C"></label><div class="grid2 keep"><label class="f">Grade<select id="cg"><option>10</option><option selected>11</option><option>12</option></select></label><label class="f">Topics<select><option>Circle geometry</option><option>Triangles</option></select></label></div><div class="card"><p class="muted" style="margin:0">Join code</p><div class="codebox">${code}</div></div><div class="actions" style="justify-content:flex-end"><button class="btn ghost" id="cx">Cancel</button><button class="btn" id="cok">Create class</button></div></div>`);
+   $('#cx').onclick=closeOv;$('#cok').onclick=()=>{const n=$('#cn').value.trim()||'New class';S.classes.push({id:S.classes.length+1,name:n,grade:+$('#cg').value,code,n:0,weak:'–'});closeOv();toast(n+' created');render()}}}}}
+
+function pClass(id,tab){const c=S.classes.find(k=>k.id===id);if(!c)return{html:'<div class="empty"><a class="btn" href="#/classes">Back</a></div>'};
+  const tabs=[['heatmap','Heatmap'],['learners','Learners'],['examples','Examples'],['assignments','Assignments'],['live','Live quiz'],['export','Export']];
+  const head=`<p><a href="#/classes">&larr; Classes</a></p><div class="row" style="border:0"><h2>${c.name}</h2><span class="pill">Code: ${c.code}</span></div><nav class="tabs">${tabs.map(([k,n])=>`<a href="#/classes/${id}/${k}" ${k===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>`;
+  const T={heatmap:tHeat,learners:tLearners,examples:tExamples,assignments:tAssign,live:tLive,export:tExport}[tab]||tHeat;const r=T(c);return{html:head+r.html,init:r.init}}
+function tHeat(c){const stage=S.heatView==='stage';const cols=stage?STG:['Centre','Segment','Cyclic','Tangent','Chord'];
+  return{html:`<div class="chips"><button class="chip round" aria-pressed="${!stage}" data-v="theorem">By theorem</button><button class="chip round" aria-pressed="${stage}" data-v="stage">By thinking stage</button></div><div class="two" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)"><div class="heat" style="grid-template-columns:90px repeat(${cols.length},minmax(46px,1fr))"><div class="h"></div>${cols.map(x=>`<div class="h">${x}</div>`).join('')}${LEARNERS.map(l=>`<div class="nm" data-l="${l.id}">${l.name}</div>`+(stage?l.st:l.th).map(v=>`<div style="background:${hue(v)}">${v}</div>`).join('')).join('')}</div>
+  <div class="card"><h3>What the class needs</h3><p>${stage?'Pattern recognition is the weakest stage for 6 of 8 learners.':'Cyclic quadrilaterals are the weakest theorem for most learners.'}</p><p class="muted">Suggested: assign "Cyclic quadrilateral" and review the Theorems page together.</p><a class="btn" href="#/classes/${c.id}/assignments">Assign examples</a></div></div>`,
+  init(){$$('[data-v]').forEach(b=>b.onclick=()=>{S.heatView=b.dataset.v;render()});$$('.heat .nm').forEach(n=>n.onclick=()=>go(`/classes/${c.id}/learners/${n.dataset.l}`))}}}
+function tLearners(c){const key=S.sort.learners;const L=LEARNERS.slice().sort((a,b)=>key==='name'?a.name.localeCompare(b.name):key==='help'?(b.help-a.help):a.st[2]-b.st[2]);
+  return{html:`<div class="chips"><span class="muted" style="align-self:center">Sort by</span>${[['name','Name'],['help','Needs help first'],['weak','Weakest patterns']].map(([k,n])=>`<button class="chip round" aria-pressed="${key===k}" data-s="${k}">${n}</button>`).join('')}</div><div class="card scroll"><table class="tbl"><thead><tr><th>Name</th><th>Last active</th><th>Examples done</th><th>Weakest stage</th><th>Flag</th></tr></thead><tbody>${L.map(l=>`<tr class="click" data-l="${l.id}"><td>${l.name}</td><td>${l.last}</td><td>${l.done}</td><td>${STG[l.st.indexOf(Math.min(...l.st))]}</td><td>${l.help?'<span class="pill warn">Needs help</span>':''}</td></tr>`).join('')}</tbody></table></div>`,
+  init(){$$('[data-s]').forEach(b=>b.onclick=()=>{S.sort.learners=b.dataset.s;render()});$$('tr.click').forEach(r=>r.onclick=()=>go(`/classes/${c.id}/learners/${r.dataset.l}`))}}}
+function pLearner(cid,lid){const l=LEARNERS.find(x=>x.id===lid);if(!l)return{html:'<div class="empty"><a class="btn" href="#/classes">Back</a></div>'};
+  return{html:`<p><a href="#/classes/${cid}/learners">&larr; Learners</a></p><h2>${l.name}</h2><div class="grid2"><div class="card"><h3>Thinking stages</h3>${STG.map((t,i)=>`<div class="row"><span style="min-width:110px">${t}</span><div class="meter"><i style="width:${l.st[i]}%"></i></div><b>${l.st[i]}%</b></div>`).join('')}</div><div class="card"><h3>Theorem mastery</h3>${['Centre','Segment','Cyclic'].map((t,i)=>`<div class="row"><span style="min-width:110px">${t}</span><div class="meter"><i style="width:${l.th[i]}%"></i></div><b>${l.th[i]}%</b></div>`).join('')}<div class="actions"><button class="btn sm" id="ap">Assign practice</button></div></div></div>
+  <div class="card scroll" style="margin-top:14px"><h3>Attempts</h3><table class="tbl"><thead><tr><th>Example</th><th>Date</th><th>Stages</th><th>Hints</th></tr></thead><tbody><tr class="click" data-a="1"><td>Find ∠OAB</td><td>12 Mar</td><td>✓ ✓ ✓ ✓</td><td>1</td></tr><tr class="click" data-a="1"><td>Cyclic quadrilateral</td><td>10 Mar</td><td>✓ ✓ ✗ –</td><td>3</td></tr></tbody></table></div>`,
+  init(){$('#ap').onclick=()=>{S.assigned.unshift({t:'Practice for '+l.name,due:'this week',ex:0});toast('Practice assigned to '+l.name)};$$('tr.click').forEach(r=>r.onclick=()=>toast('The learner\'s answers would open here, step by step'))}}}
+function tExamples(c){const rows=[['Cyclic quad proof',38,'Patterns',[100,88,62,38]],['Tangent and chord',44,'Solve',[100,90,70,44]],['Same segment',51,'Decomposition',[100,70,60,51]]];const s=rows[S.exSel];
+  return{html:`<div class="two" style="grid-template-columns:1fr 1.1fr"><div class="card scroll"><table class="tbl"><thead><tr><th>Example</th><th>Correct</th><th>Most missed</th></tr></thead><tbody>${rows.map((r,i)=>`<tr class="click" data-i="${i}" ${i===S.exSel?'style="background:var(--blue-soft)"':''}><td>${r[0]}</td><td>${r[1]}%</td><td>${r[2]}</td></tr>`).join('')}</tbody></table></div>
+  <div class="card"><h3>${s[0]}: where learners stop</h3><div class="funnel">${STG.map((t,i)=>`<div class="r"><span style="min-width:110px">${t}</span><div class="meter"><i style="width:${s[3][i]}%"></i></div><b>${s[3][i]}%</b></div>`).join('')}</div><p class="muted">Most chosen wrong answer: "Angles in the same segment"</p></div></div>`,
+  init(){$$('tr.click').forEach(r=>r.onclick=()=>{S.exSel=+r.dataset.i;render()})}}}
+function tAssign(c){return{html:`<div class="grid2"><div class="card"><h3>Current</h3>${S.assigned.map(a=>`<div class="row"><span>${a.t}</span><span class="pill warn">Due ${a.due}</span></div>`).join('')}</div><div class="card"><h3>New assignment</h3><label class="f">Example<select id="ae">${Object.values(EX).map(e=>`<option value="${e.id}">${e.title}</option>`).join('')}</select></label><label class="f">Due date<input type="date" id="ad"></label><label class="muted" style="display:flex;gap:8px;margin-bottom:10px"><input type="checkbox" checked> Give weakest learners extra examples</label><button class="btn" id="as">Assign</button></div></div>`,
+  init(){$('#as').onclick=()=>{const e=EX[+$('#ae').value];const d=$('#ad').value;S.assigned.unshift({t:e.title,due:d||'this week',ex:e.id});toast('Assigned to '+c.name+'. Learners will see it on their Home page.');render()}}}}
+function tLive(c){const L=S.live;let h='';
+  if(L.phase==='setup')h=`<div class="grid2"><div class="card"><h3>Set up</h3><label class="f">Questions<select><option>Circle geometry, 8 questions</option><option>Mixed, 10 questions</option></select></label><label class="f">Time per question<select><option>12 seconds</option><option>20 seconds</option></select></label><button class="btn" id="launch">Launch quiz</button></div><div class="card empty"><p>Learners join with a short code once you launch.</p></div></div>`;
+  if(L.phase==='lobby')h=`<div class="card" style="max-width:420px"><h3>Lobby</h3><p class="muted">Learners enter this code on the join page:</p><div class="codebox">482 913</div><p>Joined: <b id="jn">${L.joined}</b> of 40</p><div class="actions"><button class="btn" id="start">Start</button><button class="btn ghost" id="cancel">Cancel</button></div></div>`;
+  if(L.phase==='run'){const tot=L.ans.reduce((a,b)=>a+b,0);h=`<div class="two"><div class="card"><p class="muted">Question <b>${L.q}</b> of 8, <b id="tm">${L.t}</b> s left</p><div class="meter"><i id="tbar" style="width:${L.t/12*100}%"></i></div><svg viewBox="0 0 120 90" style="width:100%;max-width:260px;display:block;margin:10px auto" aria-hidden="true"><circle cx="60" cy="45" r="34" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M26 45 L94 45 M26 45 L60 11 M94 45 L60 11" stroke="var(--ink)" stroke-width="2" fill="none"/></svg><p>AB is a diameter. What is ∠ACB?</p></div><div class="card"><h3><span id="tot">${tot}</span> of 32 answered</h3><div class="bars" id="bars">${L.ans.map((a,i)=>`<div class="${L.show&&i===2?'right':''}" style="height:${Math.max(4,a/20*100)}%"><span>${a}</span></div>`).join('')}</div><div style="display:flex;text-align:center" class="muted">${['A','B','C (correct)','D'].map(x=>`<span style="flex:1">${x}</span>`).join('')}</div><div class="actions"><button class="btn" id="show">Show answer</button><button class="btn ghost" id="nq">Next question</button><button class="btn ghost" id="end">End quiz</button></div></div></div>`}
+  return{html:`<div class="banner">Later phase: the live quiz is part of phase 3 in the plan.</div>`+h,init(){
+   const sync=()=>{};
+   if(L.phase==='setup')$('#launch').onclick=()=>{L.phase='lobby';L.joined=0;render()};
+   if(L.phase==='lobby'){timers.push(setInterval(()=>{if(L.joined<32){L.joined+=2;const j=$('#jn');if(j)j.textContent=L.joined}},250));$('#start').onclick=()=>{L.phase='run';L.q=1;L.t=12;L.ans=[0,0,0,0];L.show=false;render()};$('#cancel').onclick=()=>{L.phase='setup';render()}}
+   if(L.phase==='run'){timers.push(setInterval(()=>{const tot=L.ans.reduce((a,b)=>a+b,0);if(tot<32){const k=Math.random()<.62?2:Math.floor(Math.random()*4);L.ans[k]+=Math.min(32-tot,1+Math.floor(Math.random()*3))}
+      if(L.t>0&&Math.random()<.2)L.t--;const bars=$('#bars');if(!bars)return;[...bars.children].forEach((d,i)=>{d.style.height=Math.max(4,L.ans[i]/20*100)+'%';d.firstChild.textContent=L.ans[i]});$('#tot').textContent=L.ans.reduce((a,b)=>a+b,0);$('#tm').textContent=L.t;$('#tbar').style.width=(L.t/12*100)+'%'},300));
+     $('#show').onclick=()=>{L.show=true;bars_mark()};const bars_mark=()=>{const b=$('#bars');if(b&&b.children[2])b.children[2].className='right'};
+     $('#nq').onclick=()=>{if(L.q>=8){toast('That was the last question');return}L.q++;L.t=12;L.ans=[0,0,0,0];L.show=false;render()};
+     $('#end').onclick=()=>{L.phase='setup';render();toast('Quiz ended. Results saved to the class report.')}}}}}
+function tExport(c){return{html:`<div class="grid2" style="grid-template-columns:1fr 1.2fr"><div class="card"><h3>Report</h3><div class="chips" id="rt">${['Class summary','Per learner','Per example'].map((t,i)=>`<button class="chip round" aria-pressed="${i===0}">${t}</button>`).join('')}</div><div class="chips" id="rf">${['PDF','CSV'].map((t,i)=>`<button class="chip round" aria-pressed="${i===0}">${t}</button>`).join('')}</div><label class="f">Dates<input type="text" value="1 Feb – 31 Mar"></label><button class="btn" id="dlr">Download</button><p class="muted" style="margin-top:8px">Large reports are prepared in the background. You will be told when it is ready.</p></div><div class="card scroll"><h3>Preview</h3><table class="tbl"><thead><tr><th>Learner</th><th>Examples</th><th>Weakest stage</th></tr></thead><tbody>${LEARNERS.slice(0,4).map(l=>`<tr><td>${l.name}</td><td>${l.done}</td><td>${STG[l.st.indexOf(Math.min(...l.st))]}</td></tr>`).join('')}</tbody></table></div></div>`,
+ init(){['#rt','#rf'].forEach(s=>$$(s+' .chip').forEach(b=>b.onclick=()=>$$(s+' .chip').forEach(x=>x.setAttribute('aria-pressed',x===b))));$('#dlr').onclick=()=>{toast('Preparing report…');setTimeout(()=>toast('Report ready (prototype: no file is created)'),1400)}}}}
+function pLibrary(tab){const tabs=[['examples','Examples'],['theorems','Theorems'],['definitions','Definitions'],['approach','Approach']];
+  const inner={examples:pExamples,theorems:pTheorems,definitions:pDefs,approach:pApproach}[tab]();
+  return{html:`<h2>Library</h2><p class="muted">This is what learners see. Preview any example before you assign it.</p><nav class="tabs">${tabs.map(([k,n])=>`<a href="#/library?tab=${k}" ${k===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>${inner.html}`,init:inner.init}}
+function pReports(){return{html:`<h2>Reports</h2><div class="chips"><button class="chip round" aria-pressed="true">All classes</button>${S.classes.map(c=>`<a class="chip round" style="text-decoration:none" href="#/classes/${c.id}/heatmap">${c.name}</a>`).join('')}</div><div class="grid2"><div class="card"><h3>Stage averages across classes</h3>${STG.map((t,i)=>{const a=Math.round(LEARNERS.reduce((s,l)=>s+l.st[i],0)/LEARNERS.length);return`<div class="row"><span style="min-width:120px">${t}</span><div class="meter"><i style="width:${a}%"></i></div><b>${a}%</b></div>`}).join('')}</div><div class="card"><h3>Hardest examples overall</h3><div class="row"><span>Cyclic quad proof</span><b>38%</b></div><div class="row"><span>Tangent and chord</span><b>44%</b></div><div class="row"><span>Same segment</span><b>51%</b></div></div></div><div class="actions"><button class="btn" id="ex">Export</button></div>`,init(){$('#ex').onclick=()=>go('/classes/1/export')}}}
+
+/* ---------------- author pages ---------------- */
+function pAuthor(seg){const sec=seg[1]||'examples',id=seg[2],tab=seg[3]||'diagram';
+  const tabs=`<nav class="tabs">${[['examples','Examples'],['theorems','Theorems'],['definitions','Definitions']].map(([k,n])=>`<a href="#/author/${k}" ${k===sec?'aria-current="page"':''}>${n}</a>`).join('')}</nav>`;
+  if(sec==='examples'&&id)return edEx(+id,tab);
+  if(sec==='theorems'&&id)return edTh(+id);
+  if(sec==='definitions'&&id)return edDef(+id);
+  const L={examples:S.authorEx,theorems:S.authorTh,definitions:S.authorDef}[sec];const one={examples:'example',theorems:'theorem',definitions:'definition'}[sec];
+  const cols={examples:['Title','Topic','Level','Status','Updated'],theorems:['Theorem','Topic','Examples using it','Status'],definitions:['Term','Topic','Status']}[sec];
+  const cell=(r)=>sec==='examples'?[r.t,r.topic,r.lvl,r.st,r.up]:sec==='theorems'?[r.t,r.topic,r.n,r.st]:[r.t,r.topic,r.st];
+  return{html:`<div class="row" style="border:0"><h2>Authoring</h2><button class="btn" id="new">New ${one}</button></div>${tabs}<div class="chips" id="sf"><input type="search" id="sq" placeholder="Search" style="max-width:220px" aria-label="Search">${['All','Draft','In review','Published'].map((t,i)=>`<button class="chip round" aria-pressed="${i===0}" data-s="${t}">${t}</button>`).join('')}</div><div class="card scroll"><table class="tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody id="tb"></tbody></table></div>`,
+  init(){let f='All',q='';const draw=()=>{$('#tb').innerHTML=L.map((r,i)=>[r,i]).filter(([r])=>(f==='All'||r.st===f)&&r.t.toLowerCase().includes(q)).map(([r,i])=>`<tr class="click" data-i="${i}">${cell(r).map((c,k)=>`<td>${c==='Published'?'<span class="pill ok">Published</span>':c==='Draft'||c==='In review'?`<span class="pill warn">${c}</span>`:c}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="5" class="empty">Nothing matches.</td></tr>`;$$('#tb tr.click').forEach(t=>t.onclick=()=>go(`/author/${sec}/${t.dataset.i}`+(sec==='examples'?'/diagram':'')))};
+   $$('#sf [data-s]').forEach(b=>b.onclick=()=>{f=b.dataset.s;$$('#sf [data-s]').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});$('#sq').oninput=e=>{q=e.target.value.toLowerCase();draw()};draw();
+   $('#new').onclick=()=>{const item=sec==='examples'?{t:'Untitled example',topic:'Circle',lvl:'Medium',st:'Draft',up:'Today'}:sec==='theorems'?{t:'Untitled theorem',topic:'Circle',n:0,st:'Draft'}:{t:'Untitled term',topic:'Circle',st:'Draft'};L.push(item);go(`/author/${sec}/${L.length-1}`+(sec==='examples'?'/diagram':''))}}}}
+function edEx(i,tab){const ex=S.authorEx[i]||S.authorEx[0];const tb=[['diagram','Diagram'],['stages','Stages'],['steps','Steps'],['publish','Preview and publish']];
+  const head=`<p><a href="#/author/examples">&larr; Examples</a></p><div class="row" style="border:0"><h2>${ex.t}</h2><span class="pill ${ex.st==='Published'?'ok':'warn'}">${ex.st}</span></div><nav class="tabs">${tb.map(([k,n])=>`<a href="#/author/examples/${i}/${k}" ${k===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>`;let b='',init=null;
+  if(tab==='diagram'){b=`<div class="grid2"><div class="card"><h3>Diagram data</h3><button class="btn sm ghost" id="imp">Import from GeoGebra</button><textarea id="js" style="margin-top:8px" aria-label="Diagram data">{\n "circle": {"center":"O","radius":100},\n "points": {"O":[0,0],"A":[-57,-82],"B":[57,-82],"C":[0,100]},\n "lines": [["O","A"],["O","B"],["C","A"],["C","B"],["A","B"]],\n "angles": [{"at":"C","from":"A","to":"B","label":"35°"}]\n}</textarea><p class="muted" id="val" style="margin:6px 0 0">Valid ✓ every line refers to existing points</p></div><div class="card"><h3>Live preview</h3>${ex1svg()}</div></div>`;
+    init=()=>{$('#imp').onclick=()=>toast('In the real app: choose your GeoGebra export and it is converted to this format');$('#js').oninput=e=>{try{JSON.parse(e.target.value);$('#val').textContent='Valid ✓ every line refers to existing points'}catch(x){$('#val').textContent='Not valid yet: check commas and brackets'}}}}
+  if(tab==='stages'){b=`<div class="grid2"><div class="card"><h3>1. Facts</h3>${EX[1].facts.map(f=>`<label class="row"><span>${f.t}</span><span class="muted"><input type="checkbox" ${f.need?'checked':''}> needed</span></label>`).join('')}<button class="btn sm ghost" data-t="Add fact">Add fact</button></div><div class="card"><h3>2. Sub-diagrams</h3>${EX[1].subs.map(s=>`<label class="row"><span style="width:50px">${s.inner}</span><span style="flex:1">${s.t}</span><span class="muted"><input type="checkbox" ${s.need?'checked':''}> used</span></label>`).join('')}</div></div><div class="card" style="margin-top:14px"><h3>3. Patterns</h3>${[['Angles at O and C',1],['Triangle OAB',2]].map(([n,a])=>`<div class="row"><span>${n}</span><select style="max-width:300px">${EX[1].pats.opts.slice(1).map((o,k)=>`<option ${k+1===a?'selected':''}>${o}</option>`).join('')}</select></div>`).join('')}</div>`;
+    init=()=>$$('[data-t]').forEach(x=>x.onclick=()=>toast(x.dataset.t+' (prototype)'))}
+  if(tab==='steps'){b=`<div class="card scroll"><table class="tbl"><thead><tr><th>#</th><th>Statement</th><th>Reason</th><th>Highlight</th></tr></thead><tbody>${EX[1].proof.map((p,k)=>`<tr><td>${k+1}</td><td>${p.s||p.S[p.Sc]}</td><td>${p.r||p.R[p.Rc]}</td><td><code>${p.hl.join(', ')}</code></td></tr>`).join('')}</tbody></table></div><div class="card" style="margin-top:14px"><h3>Step 3: wrong options</h3><div class="grid2"><label class="f">Wrong statement<input type="text" value="∠OAB = ∠ACB"></label><label class="f">Wrong reason<input type="text" value="Angles in the same segment"></label></div><label class="f">Hint<input type="text" value="Look at triangle OAB. Which two sides did you prove equal in step 2?"></label></div>`}
+  if(tab==='publish'){const ck=['Diagram valid','All four stages set','Steps have hints','Reviewed by a second author'];const all=()=>S.checks.every(Boolean);
+    b=`<div class="grid2"><div class="card"><h3>Check list</h3>${ck.map((c,k)=>`<label class="row"><span>${c}</span><input type="checkbox" data-c="${k}" ${S.checks[k]?'checked':''}></label>`).join('')}</div><div class="card"><h3>Preview</h3><div style="max-width:220px">${thumb(1)}</div><div class="actions"><a class="btn ghost" href="#/examples/1">Open as learner</a><button class="btn ghost" id="sd">Save draft</button><button class="btn ghost" id="sr">Submit for review</button><button class="btn" id="pb">Publish</button></div><p class="muted" id="pm"></p></div></div>`;
+    init=()=>{const upd=()=>{$('#pb').disabled=!all();$('#pm').textContent=all()?'Ready to publish.':'Publishing is blocked until every item is ticked.'};
+      $$('[data-c]').forEach(c=>c.onchange=()=>{S.checks[+c.dataset.c]=c.checked?1:0;upd()});upd();
+      $('#sd').onclick=()=>toast('Draft saved');$('#sr').onclick=()=>{ex.st='In review';toast('Submitted for review');render()};$('#pb').onclick=()=>{ex.st='Published';ex.up='Today';toast('Published. It now appears in Examples.');render()}}}
+  return{html:head+b,init}}
+function edTh(i){const t=S.authorTh[i]||S.authorTh[0];return{html:`<p><a href="#/author/theorems">&larr; Theorems</a></p><div class="row" style="border:0"><h2>Theorem editor</h2><button class="btn" id="sv">Save</button></div><div class="grid2"><div class="card"><label class="f">Name<input type="text" id="tn" value="${t.t}"></label><label class="f">Statement in plain words<textarea id="ts" style="font-family:var(--body);font-size:.95rem;min-height:70px">The angle at the centre is twice the angle at the circumference.</textarea></label><h3>Controls</h3><label class="row"><span>Angle toggle</span><input type="checkbox" checked></label><label class="row"><span>Radii toggle</span><input type="checkbox" checked></label><div class="row"><span>Slider: Radius</span><span class="muted">min 60, max 105</span></div><button class="btn sm ghost" data-t="Add slider">Add slider</button><label class="f" style="margin-top:10px">GeoGebra file ID (optional)<input type="text"></label></div><div class="card"><h3>Preview</h3><p id="pv" style="font-weight:700">${t.t}</p><p class="muted" id="pv2">The angle at the centre is twice the angle at the circumference.</p><svg class="dia" viewBox="0 0 320 270">${thm1(100,70,0,true,true).svg}</svg></div></div>`,
+  init(){$('#tn').oninput=e=>{$('#pv').textContent=e.target.value};$('#ts').oninput=e=>{$('#pv2').textContent=e.target.value};$('#sv').onclick=()=>{t.t=$('#tn').value||t.t;toast('Theorem saved')};$$('[data-t]').forEach(x=>x.onclick=()=>toast('Add slider (prototype)'))}}}
+function edDef(i){const d=S.authorDef[i]||S.authorDef[0];return{html:`<p><a href="#/author/definitions">&larr; Definitions</a></p><div class="row" style="border:0"><h2>Definition editor</h2><button class="btn" id="sv">Save</button></div><div class="grid2"><div class="card"><label class="f">Term<input type="text" id="dt" value="${d.t}"></label><label class="f">Definition<textarea id="dd" style="font-family:var(--body);font-size:.95rem;min-height:80px">A straight line joining two points on the circle.</textarea></label><label class="f">Topic<select><option>Circle</option><option>Triangles</option></select></label><label class="f">Related theorems<select><option>Same segment</option><option>Angle at the centre</option></select></label></div><div class="card"><h3>Preview card</h3><div style="max-width:220px">${mini(CB+'<path class="em" d="M31.8 50.3 L83 20.7"/>','0 0 120 80')}<h3 id="pt">${d.t}</h3><p class="muted" id="pd">A straight line joining two points on the circle.</p></div></div></div>`,
+  init(){$('#dt').oninput=e=>{$('#pt').textContent=e.target.value};$('#dd').oninput=e=>{$('#pd').textContent=e.target.value};$('#sv').onclick=()=>{d.t=$('#dt').value||d.t;toast('Definition saved')}}}}
+
+syncRole();render();
+})();
+</script>
+</body>
+</html>
