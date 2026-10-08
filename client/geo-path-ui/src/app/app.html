@@ -1,0 +1,70 @@
+<div class="shell">
+  <header class="topbar">
+    <div class="brand-block">
+      <span class="brand">GeoPath</span>
+      <span class="tag">Sprint 1</span>
+    </div>
+    <span class="phase">Foundation and Architecture</span>
+  </header>
+
+  <main class="content">
+    <section class="hero">
+      <p class="eyebrow">Project bootstrap</p>
+      <h1>{{ title }}</h1>
+      <p class="subtitle">
+        Building the platform foundation for a geometry learning experience aligned with the prototype,
+        user flows, and classroom analytics vision.
+      </p>
+
+      <div class="status-card">
+        <div class="status-row">
+          <span class="label">Backend status</span>
+          @if (loading()) {
+            <span class="status pending">Checking API...</span>
+          } @else {
+            <span class="status ok">{{ platformStatus()?.status ?? 'Unavailable' }}</span>
+          }
+        </div>
+
+        @if (platformStatus(); as status) {
+          <div class="meta-grid">
+            <div>
+              <span class="meta-label">Application</span>
+              <strong>{{ status.applicationName }}</strong>
+            </div>
+            <div>
+              <span class="meta-label">Environment</span>
+              <strong>{{ status.environment }}</strong>
+            </div>
+            <div>
+              <span class="meta-label">Version</span>
+              <strong>{{ status.version }}</strong>
+            </div>
+            <div>
+              <span class="meta-label">Last checked</span>
+              <strong>{{ status.timestampUtc | date: 'mediumTime' }}</strong>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="stack-panel">
+      <h2>Technology stack</h2>
+      <div class="stack-grid">
+        <article class="stack-item">
+          <span class="stack-name">Angular</span>
+          <p>Frontend shell and user-facing experiences.</p>
+        </article>
+        <article class="stack-item">
+          <span class="stack-name">C# / .NET</span>
+          <p>API layer, business logic, and platform services.</p>
+        </article>
+        <article class="stack-item">
+          <span class="stack-name">PostgreSQL</span>
+          <p>Relational data model for users, content, progress, and classes.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>

@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GeoPath.Api/GeoPath.Api.csproj" />
+    <Project Path="src/GeoPath.Application/GeoPath.Application.csproj" />
+    <Project Path="src/GeoPath.Domain/GeoPath.Domain.csproj" />
+    <Project Path="src/GeoPath.Infrastructure/GeoPath.Infrastructure.csproj" />
+  </Folder>
+</Solution>
