@@ -1,9 +1,10 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-/dist
+/dist/
+/out-tsc/
+/coverage/
 /tmp
-/out-tsc
 /bazel-out
 
 # Node
@@ -30,10 +31,9 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
+/.angular/cache/
 .sass-cache/
 /connect.lock
-/coverage
 /libpeerconnection.log
 testem.log
 /typings

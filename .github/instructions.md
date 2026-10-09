@@ -23,6 +23,17 @@ These files must be used to guide:
 
 Everything implemented in this project must align with the behavior represented in these design files.
 
+## 1.1 Code documentation requirements
+
+Every new or modified source file must document its code elements with concise, useful comments:
+
+- In C#, add XML documentation to classes, records, interfaces, enums, constructors, and methods. Describe parameters, return values, and exceptions where relevant. Document public properties and enum values.
+- In Angular and other client-side TypeScript, add concise JSDoc comments to classes, components, services, interfaces, enums, and methods/functions. Describe parameters and return values where relevant, and document public properties that form part of the component or service contract.
+- For top-level setup code and route declarations, add short comments that explain the purpose of each meaningful configuration or endpoint group.
+- Comments must describe behavior and intent rather than restate the code. Keep them short, accurate, and updated when behavior changes; avoid redundant comments on obvious local statements.
+
+Apply this requirement to new code in all layers, including backend and client-side code.
+
 ## 2. Mandatory process before feature development
 
 Every feature, enhancement, or change must go through the following process:

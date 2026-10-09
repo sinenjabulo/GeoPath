@@ -63,6 +63,27 @@ client/src/app
 
 server
 
+## Running Locally
+
+Start the API from the repository root:
+
+```bash
+cd server
+dotnet run --project src/GeoPath.Api
+```
+
+The API will be available at `http://localhost:5229`.
+
+In a separate terminal, install the client dependencies and start the Angular development server:
+
+```bash
+cd client/geo-path-ui
+npm install
+npm start
+```
+
+The client will be available at `http://localhost:4200/`.
+
 ## Product Vision
 
 GeoPath aims to make geometry learning more engaging, structured, and measurable by combining educational design with practical learning analytics. The goal is to help learners reason through geometry problems effectively while giving teachers and content authors the tools to support learning outcomes.
