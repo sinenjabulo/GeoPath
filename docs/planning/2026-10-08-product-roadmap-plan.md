@@ -124,6 +124,11 @@ This is the most important phase and should be treated as the first meaningful p
 - persistent learner progress tracking
 - ability to review example progress and mastery status
 
+#### Planning Documents
+
+- [Phase 2 Sprint Plan](2026-10-12-phase2-sprint-plan.md)
+- [Phase 2 Learner MVP Specification](../specs/2026-10-12-phase2-learner-mvp-spec.md)
+
 #### Why this comes first
 
 This is the central value proposition of the platform. If the learner experience is not strong, the rest of the system has limited value.
