@@ -8,6 +8,7 @@ using GeoPath.Domain;
 using GeoPath.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -253,8 +254,34 @@ app.MapGet("/api/examples/{id:guid}", async (
 // Returns published theorem and definition library entries.
 app.MapGet("/api/theorems", async (GeometryContentService contentService, CancellationToken cancellationToken) =>
     Results.Ok(await contentService.GetTheoremsAsync(cancellationToken)));
+app.MapGet("/api/theorems/{id:guid}", async Task<Results<Ok<TheoremResponse>, NotFound>> (
+    Guid id,
+    GeometryContentService contentService,
+    CancellationToken cancellationToken) =>
+{
+    var theorem = await contentService.GetTheoremAsync(id, cancellationToken);
+    return theorem is null ? TypedResults.NotFound() : TypedResults.Ok(theorem);
+})
+    .WithName("GetPublishedTheorem")
+    .WithSummary("Get a published theorem")
+    .WithDescription("Returns a published theorem by its identifier. Unpublished theorems are not exposed.")
+    .Produces<TheoremResponse>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status404NotFound);
 app.MapGet("/api/definitions", async (GeometryContentService contentService, CancellationToken cancellationToken) =>
     Results.Ok(await contentService.GetDefinitionsAsync(cancellationToken)));
+app.MapGet("/api/definitions/{id:guid}", async Task<Results<Ok<DefinitionResponse>, NotFound>> (
+    Guid id,
+    GeometryContentService contentService,
+    CancellationToken cancellationToken) =>
+{
+    var definition = await contentService.GetDefinitionAsync(id, cancellationToken);
+    return definition is null ? TypedResults.NotFound() : TypedResults.Ok(definition);
+})
+    .WithName("GetPublishedDefinition")
+    .WithSummary("Get a published definition")
+    .WithDescription("Returns a published definition by its identifier. Unpublished definitions are not exposed.")
+    .Produces<DefinitionResponse>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status404NotFound);
 
 // Creates and retrieves attempts scoped to the authenticated learner.
 app.MapPost("/api/attempts", async (

@@ -92,4 +92,4 @@ GeoPath aims to make geometry learning more engaging, structured, and measurable
 
 ## Status
 
-The repository now includes the Sprint 5 learner onboarding foundation: a public landing page, sign-in and registration flow, protected learner dashboard, and a class-join workflow using a teacher-issued code. The backend exposes the authentication and class-join endpoints required for the learner entry experience, while the Angular client routes visitors through the landing page and signed-in dashboard.
+The repository includes the Sprint 5 learner onboarding foundation: a public landing page, sign-in and registration flow, protected learner dashboard, and a class-join workflow using a teacher-issued code. Sprint 6 adds a searchable example library with topic and difficulty filters, example introduction pages, theorem and definition libraries with detail views, and contextual reference panels on examples. Published example and reference content is served by the API and linked from the landing page and learner dashboard.

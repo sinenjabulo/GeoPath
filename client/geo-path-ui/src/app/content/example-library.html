@@ -1,0 +1,68 @@
+<div class="content-shell">
+  <header class="content-topbar">
+    <a class="brand" routerLink="/">GeoPath</a>
+    <nav aria-label="Content navigation">
+      <a routerLink="/examples" aria-current="page">Examples</a>
+      <a routerLink="/theorems">Theorems</a>
+      <a routerLink="/definitions">Definitions</a>
+      <a routerLink="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <p class="eyebrow">Example library</p>
+      <h1>Find a geometry problem to explore.</h1>
+      <p>Browse published examples by topic or difficulty, then open a problem to review its references.</p>
+    </section>
+
+    <section class="filters" aria-label="Filter examples">
+      <label>
+        Search examples
+        <input type="search" [(ngModel)]="searchTerm" placeholder="Search title, topic, or prompt" />
+      </label>
+      <label>
+        Topic
+        <select [(ngModel)]="selectedTopic">
+          <option value="">All topics</option>
+          <option *ngFor="let topic of topics" [value]="topic">{{ topic }}</option>
+        </select>
+      </label>
+      <label>
+        Difficulty
+        <select [(ngModel)]="selectedDifficulty">
+          <option value="">All difficulties</option>
+          <option *ngFor="let difficulty of difficulties" [value]="difficulty">{{ difficulty }}</option>
+        </select>
+      </label>
+    </section>
+
+    <p *ngIf="isLoading" class="state-panel" role="status">Loading published examples…</p>
+    <section *ngIf="!isLoading && errorMessage" class="state-panel error-state" role="alert">
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="text-button" (click)="loadExamples()">Try again</button>
+    </section>
+    <p *ngIf="!isLoading && !errorMessage && examples.length === 0" class="state-panel">
+      No published examples are available yet. Please check back soon.
+    </p>
+    <p *ngIf="!isLoading && !errorMessage && examples.length && !filteredExamples.length" class="state-panel">
+      No examples match those filters. Try a different search, topic, or difficulty.
+    </p>
+
+    <section *ngIf="!isLoading && !errorMessage && filteredExamples.length" class="example-grid" aria-label="Published examples">
+      <article *ngFor="let example of filteredExamples" class="content-card">
+        <div class="card-meta">
+          <span>{{ example.topicName }}</span>
+          <span>{{ example.difficulty }}</span>
+        </div>
+        <h2>{{ example.title }}</h2>
+        <p>{{ example.prompt }}</p>
+        <div class="reference-counts">
+          <span>{{ example.theorems.length }} theorems</span>
+          <span>{{ example.definitions.length }} definitions</span>
+        </div>
+        <a class="card-link" [routerLink]="['/examples', example.id]">Open example <span aria-hidden="true">→</span></a>
+      </article>
+    </section>
+  </main>
+</div>

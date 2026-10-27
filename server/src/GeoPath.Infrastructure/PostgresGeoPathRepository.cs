@@ -105,6 +105,16 @@ public sealed class PostgresGeoPathRepository :
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>Gets one published theorem by identifier.</summary>
+    /// <param name="id">The theorem identifier.</param>
+    /// <param name="cancellationToken">Cancels the database query if requested.</param>
+    /// <returns>The published theorem, or <see langword="null"/> when it does not exist.</returns>
+    public Task<Theorem?> GetPublishedTheoremAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Theorems.AsNoTracking()
+            .SingleOrDefaultAsync(theorem => theorem.Id == id && theorem.IsPublished, cancellationToken);
+    }
+
     /// <summary>Gets all published definitions ordered by name.</summary>
     /// <param name="cancellationToken">Cancels the database query if requested.</param>
     /// <returns>The published definition list.</returns>
@@ -114,6 +124,16 @@ public sealed class PostgresGeoPathRepository :
             .Where(definition => definition.IsPublished)
             .OrderBy(definition => definition.Name)
             .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>Gets one published definition by identifier.</summary>
+    /// <param name="id">The definition identifier.</param>
+    /// <param name="cancellationToken">Cancels the database query if requested.</param>
+    /// <returns>The published definition, or <see langword="null"/> when it does not exist.</returns>
+    public Task<GeometryDefinition?> GetPublishedDefinitionAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Definitions.AsNoTracking()
+            .SingleOrDefaultAsync(definition => definition.Id == id && definition.IsPublished, cancellationToken);
     }
 
     /// <summary>Persists a new learner attempt.</summary>

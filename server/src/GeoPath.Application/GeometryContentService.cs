@@ -47,6 +47,18 @@ public sealed class GeometryContentService
             theorem.Explanation)).ToArray();
     }
 
+    /// <summary>Gets a published theorem by identifier.</summary>
+    /// <param name="id">The theorem identifier.</param>
+    /// <param name="cancellationToken">Cancels the query if requested.</param>
+    /// <returns>The theorem response, or <see langword="null"/> when it is unavailable.</returns>
+    public async Task<TheoremResponse?> GetTheoremAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var theorem = await _repository.GetPublishedTheoremAsync(id, cancellationToken);
+        return theorem is null
+            ? null
+            : new TheoremResponse(theorem.Id, theorem.Name, theorem.Statement, theorem.Explanation);
+    }
+
     /// <summary>Lists published definitions.</summary>
     /// <param name="cancellationToken">Cancels the query if requested.</param>
     /// <returns>Published definition response models.</returns>
@@ -57,6 +69,18 @@ public sealed class GeometryContentService
             definition.Id,
             definition.Name,
             definition.Description)).ToArray();
+    }
+
+    /// <summary>Gets a published definition by identifier.</summary>
+    /// <param name="id">The definition identifier.</param>
+    /// <param name="cancellationToken">Cancels the query if requested.</param>
+    /// <returns>The definition response, or <see langword="null"/> when it is unavailable.</returns>
+    public async Task<DefinitionResponse?> GetDefinitionAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var definition = await _repository.GetPublishedDefinitionAsync(id, cancellationToken);
+        return definition is null
+            ? null
+            : new DefinitionResponse(definition.Id, definition.Name, definition.Description);
     }
 
     /// <summary>Maps a domain example to its public API representation.</summary>

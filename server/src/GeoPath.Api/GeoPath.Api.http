@@ -4,3 +4,31 @@ GET {{GeoPath.Api_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+GET {{GeoPath.Api_HostAddress}}/api/examples
+Accept: application/json
+
+###
+
+GET {{GeoPath.Api_HostAddress}}/api/examples/ef08a50d-dc56-47ab-9c99-2104ce69c002
+Accept: application/json
+
+###
+
+GET {{GeoPath.Api_HostAddress}}/api/theorems
+Accept: application/json
+
+###
+
+GET {{GeoPath.Api_HostAddress}}/api/theorems/ef08a50d-dc56-47ab-9c99-2104ce69c003
+Accept: application/json
+
+###
+
+GET {{GeoPath.Api_HostAddress}}/api/definitions
+Accept: application/json
+
+###
+
+GET {{GeoPath.Api_HostAddress}}/api/definitions/ef08a50d-dc56-47ab-9c99-2104ce69c004
+Accept: application/json

@@ -57,6 +57,23 @@
   margin-top: 1rem;
 }
 
+.reference-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.reference-links a {
+  color: #3d4fd4;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.reference-links a:hover {
+  text-decoration: underline;
+}
+
 .loading-panel {
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(27, 39, 77, 0.08);

@@ -1,0 +1,76 @@
+<div class="content-shell">
+  <header class="content-topbar">
+    <a class="brand" routerLink="/">GeoPath</a>
+    <nav aria-label="Content navigation">
+      <a routerLink="/examples" aria-current="page">Examples</a>
+      <a routerLink="/theorems">Theorems</a>
+      <a routerLink="/definitions">Definitions</a>
+      <a routerLink="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <a routerLink="/examples" class="back-link">← Back to examples</a>
+    <p *ngIf="isLoading" class="state-panel" role="status">Loading example…</p>
+    <section *ngIf="!isLoading && errorMessage" class="state-panel error-state" role="alert">
+      <h1>Example unavailable</h1>
+      <p>{{ errorMessage }}</p>
+      <a routerLink="/examples" class="card-link">Return to the example library</a>
+    </section>
+
+    <ng-container *ngIf="!isLoading && example">
+      <section class="detail-heading">
+        <p class="eyebrow">{{ example.topicName }} · {{ example.difficulty }}</p>
+        <h1>{{ example.title }}</h1>
+        <p class="detail-intro">Problem introduction</p>
+        <p class="problem-prompt">{{ example.prompt }}</p>
+      </section>
+
+      <section class="reference-layout">
+        <div class="reference-content">
+          <h2>Explore the geometry references</h2>
+          <p>Open a theorem or definition to review it here without leaving the problem.</p>
+
+          <div class="reference-group">
+            <h3>Theorems</h3>
+            <p *ngIf="!example.theorems.length" class="muted-copy">No theorem references are linked to this example.</p>
+            <button
+              *ngFor="let theorem of example.theorems"
+              type="button"
+              class="reference-button"
+              (click)="showTheorem(theorem.id)"
+              [attr.aria-label]="'Show theorem: ' + theorem.name">
+              {{ theorem.name }} <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+          <div class="reference-group">
+            <h3>Definitions</h3>
+            <p *ngIf="!example.definitions.length" class="muted-copy">No definition references are linked to this example.</p>
+            <button
+              *ngFor="let definition of example.definitions"
+              type="button"
+              class="reference-button"
+              (click)="showDefinition(definition.id)"
+              [attr.aria-label]="'Show definition: ' + definition.name">
+              {{ definition.name }} <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+
+        <aside class="context-panel" aria-live="polite" aria-label="Reference details">
+          <p class="eyebrow">Reference panel</p>
+          <p *ngIf="isContextLoading" role="status">Loading reference…</p>
+          <div *ngIf="contextError" class="error-copy" role="alert">{{ contextError }}</div>
+          <ng-container *ngIf="!isContextLoading && !contextError && contextTitle">
+            <h2>{{ contextTitle }}</h2>
+            <p class="reference-text">{{ contextText }}</p>
+          </ng-container>
+          <p *ngIf="!isContextLoading && !contextError && !contextTitle" class="muted-copy">
+            Choose a reference to see its explanation here.
+          </p>
+        </aside>
+      </section>
+    </ng-container>
+  </main>
+</div>

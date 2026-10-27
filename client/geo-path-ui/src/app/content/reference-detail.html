@@ -1,0 +1,27 @@
+<div class="content-shell">
+  <header class="content-topbar">
+    <a class="brand" routerLink="/">GeoPath</a>
+    <nav aria-label="Content navigation">
+      <a routerLink="/examples">Examples</a>
+      <a routerLink="/theorems">Theorems</a>
+      <a routerLink="/definitions">Definitions</a>
+      <a routerLink="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <a [routerLink]="libraryUrl" class="back-link">← Back to {{ kind === 'theorem' ? 'theorems' : 'definitions' }}</a>
+    <p *ngIf="isLoading" class="state-panel" role="status">Loading reference…</p>
+    <section *ngIf="!isLoading && errorMessage" class="state-panel error-state" role="alert">
+      <h1>Reference unavailable</h1>
+      <p>{{ errorMessage }}</p>
+      <a [routerLink]="libraryUrl" class="card-link">Return to the library</a>
+    </section>
+    <article *ngIf="!isLoading && !errorMessage && name" class="reference-detail-card">
+      <p class="eyebrow">{{ kind === 'theorem' ? 'Theorem' : 'Definition' }}</p>
+      <h1>{{ name }}</h1>
+      <p class="reference-text">{{ description }}</p>
+      <a routerLink="/examples" class="card-link">Explore related examples <span aria-hidden="true">→</span></a>
+    </article>
+  </main>
+</div>

@@ -1,0 +1,41 @@
+<div class="content-shell">
+  <header class="content-topbar">
+    <a class="brand" routerLink="/">GeoPath</a>
+    <nav aria-label="Content navigation">
+      <a routerLink="/examples">Examples</a>
+      <a routerLink="/theorems" [attr.aria-current]="kind === 'theorem' ? 'page' : null">Theorems</a>
+      <a routerLink="/definitions" [attr.aria-current]="kind === 'definition' ? 'page' : null">Definitions</a>
+      <a routerLink="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <p class="eyebrow">Geometry references</p>
+      <h1>{{ title }}</h1>
+      <p>{{ description }}</p>
+      <div class="library-switch">
+        <a routerLink="/theorems" [class.active]="kind === 'theorem'">Theorems</a>
+        <a routerLink="/definitions" [class.active]="kind === 'definition'">Definitions</a>
+      </div>
+    </section>
+
+    <p *ngIf="isLoading" class="state-panel" role="status">Loading published references…</p>
+    <section *ngIf="!isLoading && errorMessage" class="state-panel error-state" role="alert">
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="text-button" (click)="loadEntries()">Try again</button>
+    </section>
+    <p *ngIf="!isLoading && !errorMessage && !entries.length" class="state-panel">
+      No published {{ kind === 'theorem' ? 'theorems' : 'definitions' }} are available yet. Please check back soon.
+    </p>
+
+    <section *ngIf="!isLoading && !errorMessage && entries.length" class="reference-grid">
+      <article *ngFor="let entry of entries" class="content-card">
+        <p class="eyebrow">{{ kind === 'theorem' ? 'Theorem' : 'Definition' }}</p>
+        <h2>{{ entry.name }}</h2>
+        <p>{{ entryText(entry) }}</p>
+        <a class="card-link" [routerLink]="detailUrl(entry.id)">Read more <span aria-hidden="true">→</span></a>
+      </article>
+    </section>
+  </main>
+</div>
