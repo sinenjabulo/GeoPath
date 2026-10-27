@@ -1,0 +1,74 @@
+<div class="dashboard-shell">
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Learner dashboard</p>
+      <h1>Welcome back, {{ user?.name || 'learner' }}.</h1>
+    </div>
+    <button type="button" class="secondary-button" (click)="signOut()">Sign out</button>
+  </header>
+
+  <div *ngIf="isLoading" class="loading-panel">Loading your learner workspace…</div>
+
+  <div *ngIf="!isLoading" class="dashboard-grid">
+    <section class="summary-card">
+      <h2>Your learning snapshot</h2>
+      <dl>
+        <div>
+          <dt>Role</dt>
+          <dd>{{ user?.role || 'Learner' }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ user?.email || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Classes</dt>
+          <dd>{{ classes.length }}</dd>
+        </div>
+      </dl>
+      <a routerLink="/" class="link-button">Browse learning preview</a>
+    </section>
+
+    <section class="activity-card">
+      <h2>Join a class</h2>
+      <form class="join-form" (ngSubmit)="joinClass()">
+        <label>
+          Class join code
+          <input type="text" [(ngModel)]="joinCode" name="joinCode" placeholder="GEO123" />
+        </label>
+        <button type="submit" class="primary-button" [disabled]="isJoining">
+          {{ isJoining ? 'Joining...' : 'Join class' }}
+        </button>
+      </form>
+
+      <p *ngIf="feedbackMessage" class="success-message">{{ feedbackMessage }}</p>
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+    </section>
+
+    <section class="classes-card">
+      <h2>Your classes</h2>
+      <ul *ngIf="classes.length; else emptyClasses" class="list-box">
+        <li *ngFor="let item of classes">
+          <strong>{{ item.name }}</strong>
+          <span>Joined {{ item.joinedAtUtc | date: 'mediumDate' }}</span>
+        </li>
+      </ul>
+      <ng-template #emptyClasses>
+        <p class="empty-state">No classes yet. Use your teacher-issued join code.</p>
+      </ng-template>
+    </section>
+
+    <section class="attempt-card">
+      <h2>Recent attempts</h2>
+      <ul *ngIf="attempts.length; else emptyAttempts" class="list-box">
+        <li *ngFor="let attempt of attempts">
+          <strong>{{ attempt.exampleId }}</strong>
+          <span>{{ attempt.status }} · {{ attempt.startedAtUtc | date: 'mediumDate' }}</span>
+        </li>
+      </ul>
+      <ng-template #emptyAttempts>
+        <p class="empty-state">No attempts yet. Pick an example and begin your first guided problem.</p>
+      </ng-template>
+    </section>
+  </div>
+</div>

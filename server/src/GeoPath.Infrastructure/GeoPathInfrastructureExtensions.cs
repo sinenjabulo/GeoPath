@@ -17,8 +17,8 @@ public static class GeoPathInfrastructureExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? Environment.GetEnvironmentVariable("GEOPATH_DB_CONNECTION");
+        var connectionString = Environment.GetEnvironmentVariable("GEOPATH_DB_CONNECTION")
+            ?? configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(

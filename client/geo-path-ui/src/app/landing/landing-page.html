@@ -1,0 +1,74 @@
+<div class="page-shell">
+  <header class="topbar">
+    <div class="brand-block">
+      <span class="brand">GeoPath</span>
+      <span class="tag">Sprint 5</span>
+    </div>
+    <nav class="nav-actions">
+      <a routerLink="/auth">Sign in</a>
+      <a routerLink="/auth" class="button primary">Create account</a>
+    </nav>
+  </header>
+
+  <main class="landing-content">
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">Geometry learning, made clearer</p>
+        <h1>Learn to reason through Euclidean geometry with confidence.</h1>
+        <p class="subtitle">
+          GeoPath helps learners practise worked examples, connect theorems to proof steps, and revisit
+          their saved progress without losing their place.
+        </p>
+
+        <div class="cta-row">
+          <a routerLink="/auth" class="button primary">Start learning</a>
+          <a routerLink="/dashboard" class="button secondary">Open dashboard</a>
+        </div>
+
+        <div class="status-strip">
+          <div>
+            <strong>4-stage flow</strong>
+            <span>Abstraction to solving</span>
+          </div>
+          <div>
+            <strong>Live progress</strong>
+            <span>Resume unfinished attempts</span>
+          </div>
+          <div>
+            <strong>Class-ready</strong>
+            <span>Join using a class code</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-card" aria-label="Sample learning preview">
+        <div class="preview-header">
+          <span class="dot dot-purple"></span>
+          <span class="dot dot-blue"></span>
+          <span class="dot dot-green"></span>
+        </div>
+
+        <div class="example-box">
+          <p class="example-label">Sample preview</p>
+          <h2>Angles in the same segment</h2>
+          <p>
+            Angles subtended by the same chord on the same segment are equal. Use the diagram to reason
+            from the givens to a clear proof.
+          </p>
+
+          <ol>
+            <li *ngFor="let step of sampleSteps">{{ step }}</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-grid">
+      <article *ngFor="let feature of features" class="feature-card">
+        <span class="feature-badge">Learn</span>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </article>
+    </section>
+  </main>
+</div>

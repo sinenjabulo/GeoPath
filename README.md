@@ -65,6 +65,8 @@ server
 
 ## Running Locally
 
+The API requires a reachable PostgreSQL database. Follow the [backend database setup](server/README.md#database-configuration) and apply migrations before starting it.
+
 Start the API from the repository root:
 
 ```bash
@@ -90,4 +92,4 @@ GeoPath aims to make geometry learning more engaging, structured, and measurable
 
 ## Status
 
-This repository currently contains the product concept, wireframes, and interactive prototype. The production application architecture is planned around the .NET backend, PostgreSQL database, and Angular front-end listed above.
+The repository now includes the Sprint 5 learner onboarding foundation: a public landing page, sign-in and registration flow, protected learner dashboard, and a class-join workflow using a teacher-issued code. The backend exposes the authentication and class-join endpoints required for the learner entry experience, while the Angular client routes visitors through the landing page and signed-in dashboard.

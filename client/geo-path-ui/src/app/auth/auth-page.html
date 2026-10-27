@@ -1,0 +1,42 @@
+<div class="auth-shell">
+  <div class="panel-card">
+    <div class="panel-header">
+      <a routerLink="/" class="back-link">← Back to home</a>
+      <div class="mode-toggle" aria-label="Authentication mode selector">
+        <button type="button" [class.active]="mode === 'sign-in'" (click)="toggleMode('sign-in')">Sign in</button>
+        <button type="button" [class.active]="mode === 'register'" (click)="toggleMode('register')">Create account</button>
+      </div>
+    </div>
+
+    <div class="auth-copy">
+      <p class="eyebrow">Learner access</p>
+      <h1>{{ mode === 'sign-in' ? 'Welcome back' : 'Join GeoPath' }}</h1>
+      <p>
+        {{ mode === 'sign-in' ? 'Continue with your learner account and pick up where you left off.' : 'Create a learner account to access guided examples and save your progress.' }}
+      </p>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="submit()">
+      <label *ngIf="mode === 'register'">
+        Name
+        <input type="text" name="name" [(ngModel)]="form.name" required placeholder="Mpho Nkosi" />
+      </label>
+
+      <label>
+        Email
+        <input type="email" name="email" [(ngModel)]="form.email" required placeholder="you@example.com" />
+      </label>
+
+      <label>
+        Password
+        <input type="password" name="password" [(ngModel)]="form.password" required minlength="8" placeholder="At least 8 characters" />
+      </label>
+
+      <button type="submit" class="submit-button" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Please wait...' : (mode === 'sign-in' ? 'Sign in' : 'Create account') }}
+      </button>
+
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+    </form>
+  </div>
+</div>
